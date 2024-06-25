@@ -9,9 +9,9 @@
     .module('cybersponse')
     .controller('threatIntelManagementConfiguration100Ctrl', threatIntelManagementConfiguration100Ctrl);
 
-  threatIntelManagementConfiguration100Ctrl.$inject = ['$scope', 'threatIntelManagementConfigurationService', 'WizardHandler', '$interval', '$controller', 'connectorService', 'currentPermissionsService'];
+  threatIntelManagementConfiguration100Ctrl.$inject = ['$scope', 'threatIntelManagementConfigurationService', 'WizardHandler', '$interval', '$controller', 'connectorService', 'currentPermissionsService', 'CommonUtils', '$window'];
 
-  function threatIntelManagementConfiguration100Ctrl($scope, threatIntelManagementConfigurationService, WizardHandler, $interval, $controller, connectorService, currentPermissionsService) {
+  function threatIntelManagementConfiguration100Ctrl($scope, threatIntelManagementConfigurationService, WizardHandler, $interval, $controller, connectorService, currentPermissionsService, CommonUtils, $window) {
     $controller('BaseConnectorCtrl', {
       $scope: $scope
     });
@@ -40,9 +40,6 @@
       }
       connector.toggleAccordion = connector.toggleAccordion === undefined ? true : !connector.toggleAccordion;
     }
-
-
-
 
     function installConnector() {
       moveEnvironmentNext();
