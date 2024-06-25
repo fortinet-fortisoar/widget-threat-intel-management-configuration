@@ -1,0 +1,328 @@
+<!-- Copyright start
+  Copyright (C) 2008 - 2023 Fortinet Inc.
+  All rights reserved.
+  FORTINET CONFIDENTIAL & FORTINET PROPRIETARY SOURCE CODE
+  Copyright end -->
+<div class="modal-header">
+    <h3 class="modal-title col-md-9">Threat Intel Management Wizard</h3>
+</div>
+<script
+    src="threatIntelManagementConfiguration-1.0.0/assets/services/threatIntelManagementConfiguration.service.js"></script>
+<script src="threatIntelManagementConfiguration-1.0.0/assets/services/schedulePlaybookTim.directive.js"></script>
+
+<wizard on-finish="close()" indicators-position="top" class="cs-wizard ingestion-steps solutionpack-wizard-steps"
+    name="solutionpackWizard">
+    <wz-step wz-title="Start" wz-order="1" class="ingestion-modal-padding wizard-first-step">
+        <div class="full-width wz-step-height padding-bottom-md solutionpack-wizard-modal-body">
+            <div class="full-height overflow-auto">
+                <div class="display-table fixed-table-layout full-height full-width">
+                    <div class="full-height display-table-cell vertical-align-middle">
+                        <div class="col-md-6 display-flex" style="justify-content: center">
+                            <img class="img-responsive"
+                                src="widgets/installed/threatIntelManagementConfiguration-1.0.0/images/firstPage.svg">
+                        </div>
+                        <div class="col-md-6 prerequisites-section padding-bottom-25 padding-left-0">
+                            <div class="font-size-40 line-height-1">TIM Configuration Wizard</div><br />
+                            <div class="padding-right-30 margin-top-sm max-width-450px">
+                                <p class="font-size-14 margin-bottom-0">This wizard will assist you in configuring
+                                    Threat Intel Management in your FortiSOAR environment. The configuration process
+                                    includes seleting integrations for feed sources, scheduling the ingestion of the
+                                    feeds, configuring outbound feed settings, selecting rules etc.</p><br />
+                            </div>
+                            <button type="button"
+                                class="btn btn-primary btn-sm margin-top-xlg text-transform-none font-size-14"
+                                data-ng-click="moveEnvironmentNext()" id="solutionpack-next-btn">Let's get started<i
+                                    class="fa fa-chevron-right margin-left-sm"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </wz-step>
+    <wz-step wz-title="Site Details" wz-order="2" class="ingestion-modal-padding">
+        <div class="full-width wz-step-height padding-bottom-md solutionpack-wizard-modal-body">
+            <div class="full-height overflow-auto">
+                <div class="display-table fixed-table-layout full-height full-width">
+                    <div class="full-height display-table-cell vertical-align-middle">
+                        <div class="col-md-6 display-flex" style="justify-content: center">
+                            <img class="img-responsive padding-top-70 step-image"
+                                src="widgets/installed/threatIntelManagementConfiguration-1.0.0/images/secondPage.svg">
+                        </div>
+                        <div class="col-md-6 prerequisites-section padding-bottom-25 padding-left-0">
+                            <hr>
+                            <div class="margin-top-negative-10">
+                                <h3>Feed Sources</h3>
+                                <p class="font-size-14 margin-bottom-0">On the this page, you're can pick from a variety
+                                    of feed sources, to fetch feeds within the FortiSOAR environment.</p><br />
+                            </div>
+                            <div>
+                               <span  class="font-sizze-18">
+                                Default Feed Sources
+                               </span>
+                                <p style="color: #B7CAE1;">
+                                    As a part of TIM SP installation FourtiGaurd Threat Intel connector is installed and
+                                    configured to fetch the feeds.
+                                </p>
+                            </div>
+                            <!-- <div data-ng-if="selectedConnector"
+                                class="margin-top-md padding-left-0 padding-right-0 connector-config-width"
+                                data-ng-include="'app/settings/connectorConfig.html'"> </div> -->
+                            <div>
+                                <span class="font-sizze-18">
+                                    Additional Feed Sources
+                                </span>
+                                <p style="color: #B7CAE1;"> 
+                                    Select the integrations from the list of Additional Feed sources that you wish to
+                                    fetch feeds from.
+                                </p>
+                                <div>
+                                    <input class="form-control margin-bottom-lg" type="text" placeholder="Search" ng-model="searchQuery">
+                                    <!-- Use filter to search feedConnectors -->
+                                    
+                                    <div ng-repeat="connector in feedConnectors | filter:searchQuery">
+                                        <uib-accordion>
+                                            <div class="display-flex">
+                                                <div class="checkbox margin-top-0" style="margin-bottom: 5px;">
+                                                    <label class="padding-top-md" for="selectConnector">
+                                                        <input class="margin-top-0 " type="checkbox"
+                                                            id="selectConnector"
+                                                            data-ng-model="connector.selectConnector"
+                                                            data-ng-disabled="connector.installed" />
+                                                    </label>
+                                                </div>
+                                                <div uib-accordion-group class="panel-default" style="width: 100%;">
+                                                    <uib-accordion-heading class="padding-md">
+                                                        <div class="display-flex">
+                                                            <div ng-click="toggleAdvancedSettings(connector)"
+                                                                data-ng-class="{'queue-text-active-color': connector.toggleAccordion">
+                                                                <div class="margin-right-lg pull-left"><span
+                                                                        class="queue-card-actions">&nbsp;<i
+                                                                            class="fa {{ connector.toggleAccordion ? 'fa-chevron-down' : 'fa-chevron-right'}}"></i></span>
+                                                                </div>
+                                                                <div
+                                                                    class="pull-left queue-card-header-text margin-right-3">
+                                                                    {{connector.label}}
+                                                                </div>
+                                                                <div class="clearfix"></div>
+                                                            </div>
+                                                        </div>
+                                                    </uib-accordion-heading>
+                                                    <div class="padding-lg">
+                                                        <div class="display-flex">
+                                                            <img src="{{connector.iconLarge}}" alt="" height="60px"
+                                                                style="border-radius: 4px;margin-right: 10px;">
+                                                            <table>
+                                                                <tr>
+                                                                    <td style="color: #A3AAB7;">Version</td>
+                                                                    <td>{{connector.version}}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td style="padding-right: 25px; color: #A3AAB7;">Published by </td>
+                                                                    <td>{{connector.publisher}}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td style="color: #A3AAB7;">Certified </td>
+                                                                    <td>{{connector.certified ? 'Yes' : 'No'}}</td>
+                                                                </tr>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </uib-accordion>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="ingestion-modal-footer">
+            <button type="button" class="btn btn-sm btn-second-primary margin-top-lg margin-left-lg"
+                id="version-control-back-btn" data-ng-click="movePrevious()"><i
+                    class="fa fa-chevron-left margin-right-sm"></i>Back</button>
+            <button type="button" class="btn btn-primary pull-right btn-sm margin-top-lg margin-right-lg"
+                data-ng-click="installConnector()" id="version-control-next-btn">Proceed & install<i
+                    class="fa fa-chevron-right margin-left-sm"></i>
+            </button>
+        </div>
+    </wz-step>
+    <wz-step wz-title="Site Details" wz-order="3" class="ingestion-modal-padding">
+        <div class="full-width wz-step-height padding-bottom-md solutionpack-wizard-modal-body">
+            <div class="full-height overflow-auto">
+                <div class="display-table fixed-table-layout full-height full-width">
+                    <div class="full-height display-table-cell vertical-align-middle">
+                        <div class="col-md-6 display-flex" style="justify-content: center">
+                            <img class="img-responsive padding-top-70 step-image"
+                                src="widgets/installed/threatIntelManagementConfiguration-1.0.0/images/secondPage.svg">
+                        </div>
+                        <div class="col-md-6 prerequisites-section padding-bottom-25 padding-left-0">
+                            <h3>
+                                Installation Progress
+                            </h3>
+                            <div class="font-size-14 margin-bottom-lg" style="color: #E1E1E1;">
+                                On this page, you will find the installation status of the integration you selected on
+                                the previous page.
+                            </div>
+                            <div class="font-size-16 padding-bottom-md padding-top-md" style="color: #A3AAB7;">
+                                Total Connectors {{getSelectedConnectorsCount()}}
+                            </div>
+                            <div ng-if="connector.selectConnector" ng-repeat="connector in feedConnectors"
+                                class="display-flex-space-between"
+                                style="border: 1px solid #29323E;padding: 10px; width: 85%; margin-bottom: 10px;">
+                                <div style="color: #D2D5DA;"
+                                    class="pull-left queue-card-header-text margin-right-3 font-size-14">
+                                    {{connector.label}}
+                                </div>
+                                <div ng-if="!connector.installed && connector.selectConnector" class="font-size-12"
+                                    style="color: #F3D11E;">
+                                    <img class="padding-bottom-3 padding-right-sm"
+                                        src="widgets/installed/threatIntelManagementConfiguration-1.0.0/images/installing.svg"></img>
+                                    Installing...
+                                </div>
+                                <div ng-if="connector.installed && connector.selectConnector" class="font-size-12"
+                                    style="color: #29B35C; margin-right: 20px;">
+                                    <span class="icon icon-check-variant" style="margin-right: 3px;"></span> Installed
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="ingestion-modal-footer">
+            <button type="button" class="btn btn-sm btn-second-primary margin-top-lg margin-left-lg"
+                id="version-control-back-btn" data-ng-click="movePrevious()"><i
+                    class="fa fa-chevron-left margin-right-sm"></i>Back</button>
+            <button type="button" class="btn btn-primary pull-right btn-sm margin-top-lg margin-right-lg"
+                data-ng-disabled="!allConnectorsInstalled" data-ng-click="moveEnvironmentNext('true')"
+                id="version-control-next-btn-config">Configure Connectors<i
+                    class="fa fa-chevron-right margin-left-sm"></i>
+            </button>
+        </div>
+    </wz-step>
+    <wz-step wz-title="Site new" wz-order="4" class="ingestion-modal-padding">
+        <!-- <div style="background-color: white; height: 10px;" data-ng-click="loadConnectorDetails()"> -->
+        <div class="full-width wz-step-height padding-bottom-md solutionpack-wizard-modal-body">
+            <div class="font-size-40 line-height-1 text-center">Enter Your Site Details</div><br />
+            <div class="full-height overflow-auto">
+                <div class="display-table fixed-table-layout full-height full-width">
+                    <div class="full-height display-table-cell vertical-align-middle">
+                        <div class="col-md-6 display-flex" style="justify-content: center">
+                            <img class="img-responsive padding-top-70 step-image"
+                                src="widgets/installed/threatIntelManagementConfiguration-1.0.0/images/versionControl.png">
+                        </div>
+                        <div class="col-md-6 prerequisites-section padding-bottom-25 padding-left-0">
+                            <hr>
+                            <div class="margin-top-negative-10 padding-left-10">
+                                <p class="font-size-14 margin-bottom-0">Review and add configurations for Remote
+                                    FortiSOAR connector.</p><br />
+                            </div>
+
+                            <div>
+                                <uib-accordion close-others="true">
+                                    <!-- <div class="display-flex"> -->
+                                    <div is-open="currentConnector.toggleAccordion"
+                                        ng-repeat="currentConnector in installedConnectors" uib-accordion-group
+                                        class="panel-default" style="width: 100%;">
+                                        <uib-accordion-heading class="padding-md">
+                                            <div class="display-flex">
+                                                <div ng-click="toggleAdvancedSettings(currentConnector, 'true'); loadConnectorDetails(currentConnector)"
+                                                    data-ng-class="{'queue-text-active-color': currentConnector.toggleAccordion">
+                                                    <div class="margin-right-lg pull-left"><span>&nbsp;<i
+                                                                class="fa {{ currentConnector.toggleAccordion ? 'fa-chevron-down' : 'fa-chevron-right'}}"></i></span>
+                                                    </div>
+                                                    <div class="pull-left queue-card-header-text margin-right-3">
+                                                        {{currentConnector.label}}
+                                                    </div>
+                                                    <div class="clearfix"></div>
+                                                </div>
+                                            </div>
+                                        </uib-accordion-heading>
+                                        <div data-ng-if="selectedConnector &&  currentConnector.toggleAccordion "
+                                            class="padding-lg" ng-form="formHolder.connectorForm"
+                                            name="formHolder.connectorForm">
+                                            <div class="margin-top-md padding-left-0 padding-right-0 connector-config-width"
+                                                data-ng-include="'app/settings/connectorConfig.html'">
+                                            </div>
+                                            <div class="col-md-12">
+                                                <button type="button" class="btn btn-primary"
+                                                    data-ng-disabled="!(formHolder.connectorForm.$valid && formHolder.connectorForm.$dirty)"
+                                                    data-ng-click="saveConnector()"
+                                                    id="submit-remote-fortisoar-config-add-btn"><i
+                                                        class="icon icon-check margin-right-sm"></i>Save</button>
+                                                <button type="button" class="btn btn-default"
+                                                    data-ng-disabled="processing" data-ng-click="closeConfiguration()"
+                                                    id="cancel-remote-fortisoar-config-add-btn"><i
+                                                        class="icon icon-close margin-right-sm"></i>Cancel</button>
+                                                <hr>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- </div> -->
+                                </uib-accordion>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="ingestion-modal-footer">
+            <button type="button" class="btn btn-sm btn-second-primary margin-top-lg margin-left-lg"
+                id="version-control-back-btn" data-ng-click="movePrevious()"><i
+                    class="fa fa-chevron-left margin-right-sm"></i>Back</button>
+            <button type="button" class="btn btn-primary pull-right btn-sm margin-top-lg margin-right-lg"
+                data-ng-click="moveEnvironmentNext()" id="version-control-next-btn">Next<i
+                    class="fa fa-chevron-right margin-left-sm"></i>
+            </button>
+        </div>
+    </wz-step>
+    <wz-step wz-title="Site new" wz-order="5" class="ingestion-modal-padding">
+        <!-- <div style="background-color: white; height: 10px;" data-ng-click="loadConnectorDetails()"> -->
+        <div class="full-width wz-step-height padding-bottom-md solutionpack-wizard-modal-body">
+            <div class="font-size-40 line-height-1 text-center">Enter Your Site Details</div><br />
+            <div class="full-height overflow-auto">
+                <div class="display-table fixed-table-layout full-height full-width">
+                    <div class="full-height display-table-cell vertical-align-middle">
+                        <div class="col-md-6 display-flex" style="justify-content: center">
+                            <img class="img-responsive padding-top-70 step-image"
+                                src="widgets/installed/threatIntelManagementConfiguration-1.0.0/images/feedPool.png">
+                        </div>
+                        <div class="col-md-6 prerequisites-section padding-bottom-25 padding-left-0">
+                            <hr>
+                            <div class="margin-top-negative-10 padding-left-10">
+                                Feed Pool Setting
+                                <p class="font-size-14 margin-bottom-0">On this page, you can configure the schedule
+                                    base ingestion of the feeds i.e. you can specify the polling frequency of Feeds, so
+                                    that Feeds gets pulled from installed Feed integrations into FortiSOAR.</p><br />
+                            </div>
+
+                            <div>
+                                Schedule Setting
+                                <p>
+                                    In the Configure Schedule Settings section, specify the Cron expression, for
+                                    example, if you want to pull data from Feed sources every morning at 5 a.m., click
+                                    Daily, in the hour box enter 5, and in the minute box, enter 0
+                                </p>
+                            </div>
+                            <div>
+                                <!-- <div class="margin-left-md" data-schedule-playbook-tim view-widget-vars="viewWidgetVars" connectors-to-schedule="installedConnectors"></div> -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="ingestion-modal-footer">
+            <button type="button" class="btn btn-sm btn-second-primary margin-top-lg margin-left-lg"
+                id="version-control-back-btn" data-ng-click="movePrevious()"><i
+                    class="fa fa-chevron-left margin-right-sm"></i>Back</button>
+            <button type="button" class="btn btn-primary pull-right btn-sm margin-top-lg margin-right-lg"
+                data-ng-click="moveVersionControlNext()" id="version-control-next-btn">Next<i
+                    class="fa fa-chevron-right margin-left-sm"></i>
+            </button>
+        </div>
+    </wz-step>
+</wizard>

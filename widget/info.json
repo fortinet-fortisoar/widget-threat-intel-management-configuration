@@ -1,0 +1,22 @@
+{
+    "name": "threatIntelManagementConfiguration",
+    "title": "Threat Intel Management Configuration",
+    "subTitle": "Configuration wizard for Threat Intel Management Solution Pack",
+    "version": "1.0.0",
+    "published_date": 1718083568,
+    "releaseNotes": "unavailable",
+    "metadata": {
+        "description": "To configure the required settings for the Threat Intel Management SP",
+        "pages": [],
+        "certified": "No",
+        "publisher": null,
+        "compatibility": [
+            "7.4.3"
+        ],
+        "standalone": true,
+        "windowClass": "Full Width",
+        "category": [
+            "ThreatIntel"
+        ]
+    }
+}
