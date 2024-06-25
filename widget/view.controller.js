@@ -79,7 +79,7 @@
             installSequentially(index + 1);
           });
       }
-      // installSequentially(0);
+      installSequentially(0);
     }
 
     function loadConnectorDetails(connector) {
