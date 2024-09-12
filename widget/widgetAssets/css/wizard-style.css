@@ -1,0 +1,100 @@
+/* Copyright start
+  MIT License
+  Copyright (c) 2024 Fortinet Inc
+  Copyright end */
+.tim-config-steps {
+	.steps-indicator {
+		li {
+			&:first-child {
+				a::before {
+					content: "\e97c";
+				}
+			}
+
+			&:nth-child(2) {
+				a::before {
+					content: "\e91f";
+				}
+			}
+
+			&:nth-child(3) {
+				a::before {
+					content: "\ef41c";
+				}
+			}
+
+			&:nth-child(4) {
+				a::before {
+					content: "\e985";
+				}
+			}
+
+			&:nth-child(5) {
+				a::before {
+					content: "\e998";
+				}
+			}
+
+			/* &:nth-child(6) {
+				&.done::before,
+				&.current::before,
+				&.editing::before {
+					left: 0px;
+					right: 0px;
+				}
+				a::before {
+					content: "\ef543";
+				}
+			} */
+			&:last-child {
+				a::before {
+					content: "\e97e";
+				}
+			}
+		}
+	}
+}
+
+.info-graphic-margin {
+	margin-top: 20%;
+	margin-left: 20%;
+}
+
+#outbreakConnectorWizard>div {
+	.col-md-8 {
+		width: 100%;
+	}
+}
+
+.tim-connector-config-width > .row > div > .col-md-6 {
+	width: 100% !important;
+}
+
+.disabled-link {
+	pointer-events: none;
+	/* Disable click events */
+	color: gray;
+	/* Optionally, change the text color to gray */
+	text-decoration: none;
+	/* Optionally, remove underline */
+	opacity: 0.5;
+	/* Optionally, reduce opacity to visually indicate disabled state */
+	/* Add other styles as needed */
+}
+
+.tim-wizard-solutionpack-wizard-steps .custom-installing-spinner-content .custom-installing-spinner-block .custom-installing-spinner:before {
+	border-bottom-color: #E37607;
+	border-top-color: #E37607;
+}
+
+#timConfigurationWizard>div {
+	.col-md-8 {
+		width: 100%;
+	}
+}
+
+.additional-feed-connector > uib-accordion  { 
+	.panel-group {
+			margin-bottom: 6px;
+		}
+	}
