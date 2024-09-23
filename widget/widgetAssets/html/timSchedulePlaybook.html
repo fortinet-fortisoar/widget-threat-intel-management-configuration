@@ -7,10 +7,10 @@
   <fieldset data-ng-disabled="!allowEdit">
     <div class="row">
       <div data-ng-if="!params.form.schedule.kwargs.exit_if_running"
-        class="col-md-12 font-size-14 margin-bottom-md padding-0">Do you want to schedule the ingestion?<span
+        class="col-md-12 font-size-14 control-label margin-bottom-md padding-0">Do you want to schedule the ingestion?<span
           data-ng-show="field.required && form.config.ignoreRequired" class="text-danger">*</span></div>
       <div data-ng-if="!params.form.schedule.kwargs.exit_if_running" class="cs-select width-150 float-left">
-        <select class="form-control width-150" data-ng-model="params.form.scheduled">
+        <select class="control-label form-control width-150" data-ng-model="params.form.scheduled">
           <option value="N">No</option>
           <option value="Y">Yes</option>
         </select>

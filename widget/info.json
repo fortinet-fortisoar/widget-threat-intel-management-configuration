@@ -6,12 +6,12 @@
     "published_date": 1718083568,
     "releaseNotes": "unavailable",
     "metadata": {
-        "description": "To configure the required settings for the Threat Intel Management SP",
+        "description": "This wizard is designed to assist you in setting up Threat Intel Management within your FortiSOAR environment. It will guide you through selecting and configuring feed integrations, scheduling feed ingestion, adjusting Threat Intel settings, and configuring Solution Packs to enhance your threat intelligence infrastructure.",
         "pages": [],
         "certified": "No",
         "publisher": null,
         "compatibility": [
-            "7.5.0"
+            "7.6.0"
         ],
         "standalone": true,
         "windowClass": "Full Width",

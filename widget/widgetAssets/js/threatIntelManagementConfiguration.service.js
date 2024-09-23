@@ -12,10 +12,11 @@ Copyright end */
 
     function threatIntelManagementConfigurationService(marketplaceService, $q, $http, API, ALL_RECORDS_SIZE, $filter, Modules, CommonUtils) {
 
+        const WAIT_IN_SEC = 5000;
         var service = {
             getFeedConnectors: getFeedConnectors,
             installConnector: installConnector,
-            getInstallationProgress: getInstallationProgress
+            getConnectorInstallationProgress: getConnectorInstallationProgress
         }
         return service;
 
@@ -30,7 +31,7 @@ Copyright end */
             return defer.promise
         }
 
-        function getInstallationProgress(importJobId) {
+        function getConnectorInstallationProgress(importJobId) {
             var defer = $q.defer();
             const fields = ['errorMessage', 'status', 'progressPercent', 'file', 'currentlyImporting'];
             const intervalId = setInterval(function () {
@@ -50,7 +51,7 @@ Copyright end */
                 clearInterval(intervalId);
                 defer.reject(error);
               });
-            }, 5000);
+            }, WAIT_IN_SEC);
           
             return defer.promise;
           }

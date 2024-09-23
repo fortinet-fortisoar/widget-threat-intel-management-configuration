@@ -7,9 +7,7 @@
 <div class="modal-header">
     <h3 class="modal-title col-md-9">Threat Intel Management Configuration</h3>
 </div>
-<script
-    src="threatIntelManagementConfiguration-1.0.0/widgetAssets/js/threatIntelManagementConfiguration.service.js"></script>
-
+<script src="{{widgetScript}}"></script>
 <wizard on-finish="close()" indicators-position="top"
     class="cs-wizard ingestion-steps solutionpack-wizard-steps tim-config-steps" name="timSolutionpackWizard">
     <wz-step wz-title="Start" wz-order="1" class="ingestion-modal-padding wizard-first-step full-width">
@@ -18,39 +16,35 @@
                 <div class="display-table fixed-table-layout full-height full-width">
                     <div class="full-height display-table-cell vertical-align-middle">
                         <div class="col-md-6 display-flex" style="justify-content: center">
-                            <img class="img-responsive step-image"
-                                src="widgets/installed/threatIntelManagementConfiguration-1.0.0/images/firstPage.svg">
+                            <img class="img-responsive step-image" src="{{startInfoGraphics}}">
                         </div>
                         <div class="col-md-6 prerequisites-section padding-bottom-25 padding-left-0">
                             <div class="font-size-30 muted-80 line-height-1 padding-bottom-md">Welcome</div>
                             <div
                                 class="solid-border element-secondary-bgcolor margin-right-25 padding-top-md padding-bottom-md">
-                                <p class="margin-left-15 font-Size-13 muted"><span>This wizard is designed to guide you
-                                        through setting
-                                        up Threat Intel Management Configuration within your FortiSOAR environment. From
-                                        selecting and
-                                        configuring feed integrations, scheduling feed ingestion, setting up Threat
-                                        Intel settings, and configuring Solution Packs to optimize your threat
-                                        intelligence infrastructure.</span></p>
+                                <p class="margin-left-15 font-Size-13 muted"><span>This wizard is designed to assist you
+                                        in setting up Threat Intel Management within your FortiSOAR environment. It will
+                                        guide you through selecting and configuring feed integrations, scheduling feed
+                                        ingestion, adjusting Threat Intel settings, and configuring Solution Packs to
+                                        enhance your threat intelligence infrastructure.</span></p>
                                 <h6
                                     class="margin-left-15 font-weight-normal margin-bottom-sm modal-title text-transform-none">
                                     Prerequisites</h6>
                                 <p class="font-Size-13 margin-bottom-0 margin-left-15 muted">
-                                    <span>Before we begin, ensure you have the necessary configuration details for the
-                                        integrations at hand. These details will be crucial as we proceed with setting
-                                        up your threat intelligence management system.</span>
+                                    <span>Before we start, please make sure you have the required configuration details
+                                        for the integrations ready. These details will be essential as we set up your
+                                        threat intelligence management system.</span>
                                 </p>
                             </div>
                             <button type="button"
                                 class="btn btn-primary btn-sm margin-top-xlg text-transform-none font-size-14"
+                                data-ng-disabled="!isFortiGuardConectorInstalled"
                                 data-ng-click="moveToSelectConnector()" id="solutionpack-next-btn">
-                                <!-- Conditional Text Rendering -->
-                                <span data-ng-if="isFortiGuardConectorInsttalled === false">Installing Fortinet
+                                <span data-ng-if="isFortiGuardConectorInstalled === false">Installing Fortinet
                                     FortiGuard Connector...</span>
-                                <span data-ng-if="isFortiGuardConectorInsttalled === true">Let's get started</span>
-                                <!-- Conditional Icon Rendering -->
+                                <span data-ng-if="isFortiGuardConectorInstalled === true">Let's get started</span>
                                 <i class="fa margin-left-sm"
-                                    data-ng-class="!isFortiGuardConectorInsttalled ? 'fa-spin fa-spinner' : 'fa-chevron-right'"></i>
+                                    data-ng-class="!isFortiGuardConectorInstalled ? 'fa-spin fa-spinner' : 'fa-chevron-right'"></i>
                             </button>
                         </div>
                     </div>
@@ -64,8 +58,7 @@
                 <div class="display-table fixed-table-layout full-height full-width">
                     <div class="full-height display-table-cell vertical-align-middle">
                         <div class="col-md-6 display-flex margin-top-70" style="justify-content: center">
-                            <img class="img-responsive step-image"
-                                src="widgets/installed/threatIntelManagementConfiguration-1.0.0/images/secondPage.svg">
+                            <img class="img-responsive step-image" src="{{feedSources}}">
                         </div>
                         <div class="col-md-6 prerequisites-section padding-bottom-25 padding-left-0" style="
                         height: calc(100vh - 300px);">
@@ -90,9 +83,9 @@
                                             <td style="color: #A3AAB7;">Name</td>
                                             <td>
                                                 <span>{{fortiGuardConector.label}} | </span>
-                                                <i data-ng-if="isFortiGuardConectorInsttalled"
+                                                <i data-ng-if="isFortiGuardConectorInstalled"
                                                     class="font-size-14 margin-0 text-center margin-top-sm text-success text-success icon icon-approval margin-right-sm"></i>
-                                                <i data-ng-if="!isFortiGuardConectorInsttalled"
+                                                <i data-ng-if="!isFortiGuardConectorInstalled"
                                                     class="font-size-14 margin-0 text-center margin-top-sm margin-bottom-sm text-danger icon icon-failed margin-right-sm"></i>
                                                 <span> Installed</span>
                                             </td>
@@ -134,12 +127,11 @@
                                                         <div
                                                             class="checkbox margin-bottom-0 margin-right-md margin-top-0">
                                                             <label for="selectConnector-{{connector.uuid}}">
-                                                                <input
-                                                                    ng-click="toggleSelectFeedsSettings($event)"
-                                                                    class="padding-top-7" type="checkbox"
+                                                                <input ng-click="toggleSelectFeedsSettings($event)"
+                                                                    class="padding-top-7 selectedInstallConnector"
+                                                                    type="checkbox" role="checkbox"
                                                                     id="selectConnector-{{connector.uuid}}"
-                                                                    data-ng-model="connector.selectConnector"
-                                                                    data-ng-disabled="connector.installed" />
+                                                                    data-ng-model="connector.selectConnector" />
                                                             </label>
                                                         </div>
                                                         <div data-ng-class="{'queue-text-active-color': connector.toggleSelectFeeds
@@ -153,9 +145,16 @@
                                                             </div>
                                                             <div class="clearfix"></div>
                                                         </div>
+                                                        <div
+                                                            class="font-size-14 justify-content margin-left-auto margin-right-sm">
+                                                            <i data-ng-if="connector.installed"
+                                                                class="text-success icon icon-check"><span>
+                                                                    Installed</span></i>
+                                                        </div>
                                                     </div>
                                                 </uib-accordion-heading>
-                                                <div class="display-flex font-size-12 padding-left-18">
+                                                <div
+                                                    class="display-flex font-size-12 margin-top-negative-20 ng-scope padding-left-18">
                                                     <img src="{{connector.iconLarge}}" alt="" height="60px"
                                                         style="border-radius: 4px;margin-right: 10px;">
                                                     <table>
@@ -163,10 +162,6 @@
                                                             <td style="color: #A3AAB7;">Installed</td>
                                                             <td class="text-capitalize">
                                                                 {{connector.installed}}
-                                                                <i data-ng-if="connector.installed"
-                                                                    class="font-size-14 margin-0 text-center margin-top-sm text-success text-success icon icon-approval margin-right-sm"></i>
-                                                                <i data-ng-if="!connector.installed"
-                                                                    class="font-size-14 margin-0 text-center margin-top-sm margin-bottom-sm text-danger icon icon-failed margin-right-sm"></i>
                                                             </td>
                                                         </tr>
                                                         <tr>
@@ -210,8 +205,7 @@
                 <div class="display-table fixed-table-layout full-height full-width">
                     <div class="full-height display-table-cell vertical-align-middle">
                         <div class="col-md-6 display-flex" style="justify-content: center">
-                            <img class="img-responsive padding-top-70 step-image"
-                                src="widgets/installed/threatIntelManagementConfiguration-1.0.0/images/secondPage.svg">
+                            <img class="img-responsive padding-top-70 step-image" src="{{installFeeds}}">
                         </div>
                         <div class="col-md-6 prerequisites-section padding-bottom-30 padding-left-0 padding-right-30 padding-top-30"
                             style="height: calc(100vh - 220px);">
@@ -256,11 +250,13 @@
                 id="version-control-back-btn" data-ng-click="backToinstallConnector()"><i
                     class="fa fa-chevron-left margin-right-sm"></i>Back</button>
             <button type="button" class="btn btn-primary pull-right btn-sm margin-top-lg margin-right-lg"
-                data-ng-click="moveToConfigureConnector()" id="version-control-next-btn-config">
+                data-ng-disabled="!allConnectorsInstalled" data-ng-click="moveToConfigureConnector()"
+                id="version-control-next-btn-config">
                 <span data-ng-if="allConnectorsInstalled === false">Checking connector installation...</span>
                 <span data-ng-if="allConnectorsInstalled === true">Configure Connectors</span>
                 <i class="fa margin-left-sm"
                     data-ng-class="!allConnectorsInstalled ? 'fa-spin fa-spinner' : 'fa-chevron-right'"></i>
             </button>
         </div>
+    </wz-step>
 </wizard>

@@ -9,9 +9,9 @@
     .module('cybersponse')
     .controller('threatIntelManagementConfiguration100Ctrl', threatIntelManagementConfiguration100Ctrl);
 
-  threatIntelManagementConfiguration100Ctrl.$inject = ['$scope', 'threatIntelManagementConfigurationService', 'WizardHandler', '$controller', '$state', 'connectorService', 'currentPermissionsService', 'CommonUtils', '$window', 'API', '_', '$filter', '$q', 'dataIngestionService', 'PagedCollection', '$resource', 'FIXED_MODULE', 'Entity', 'playbookService', 'translationService', 'toaster', 'appModulesService', 'widgetBasePath'];
+  threatIntelManagementConfiguration100Ctrl.$inject = ['$scope', 'threatIntelManagementConfigurationService', 'WizardHandler', '$controller', '$state', 'connectorService', 'currentPermissionsService', 'CommonUtils', '$window', 'API', '_', '$filter', '$q', 'dataIngestionService', 'PagedCollection', '$resource', 'FIXED_MODULE', 'Entity', 'playbookService', 'translationService', 'toaster', 'appModulesService', 'widgetBasePath', '$rootScope', 'marketplaceService'];
 
-  function threatIntelManagementConfiguration100Ctrl($scope, threatIntelManagementConfigurationService, WizardHandler, $controller, $state, connectorService, currentPermissionsService, CommonUtils, $window, API, _, $filter, $q, dataIngestionService, PagedCollection, $resource, FIXED_MODULE, Entity, playbookService, translationService, toaster, appModulesService, widgetBasePath) {
+  function threatIntelManagementConfiguration100Ctrl($scope, threatIntelManagementConfigurationService, WizardHandler, $controller, $state, connectorService, currentPermissionsService, CommonUtils, $window, API, _, $filter, $q, dataIngestionService, PagedCollection, $resource, FIXED_MODULE, Entity, playbookService, translationService, toaster, appModulesService, widgetBasePath, $rootScope, marketplaceService) {
     $controller('BaseConnectorCtrl', {
       $scope: $scope
     });
@@ -21,21 +21,33 @@
     $scope.moveToSelectConnector = moveToSelectConnector;
     $scope.installConnector = installConnector;
     $scope.toggleSelectFeedsSettings = toggleSelectFeedsSettings;
+    $scope.toggleConnectorConfigSettings = toggleConnectorConfigSettings;
     $scope.allConnectorsInstalled = false;
     $scope.feedConnectors = [];
     $scope.installedConnectors = [];
     $scope.searchQuery = '';
+    $scope.isLightTheme = $rootScope.theme.id === 'light';
     $scope.widgetBasePath = widgetBasePath;
+    $scope.startInfoGraphics = $scope.isLightTheme ? widgetBasePath + 'images/start-light.svg' : widgetBasePath + 'images/start-dark.svg';
+    $scope.feedSources = $scope.isLightTheme ? widgetBasePath + 'images/feed-sources-light.svg' : widgetBasePath + 'images/feed-sources-dark.svg';
+    $scope.installFeeds = $scope.isLightTheme ? widgetBasePath + 'images/install-feeds-light.svg' : widgetBasePath + 'images/install-feeds-dark.svg';
+    $scope.configFeeds = $scope.isLightTheme ? widgetBasePath + 'images/config-feeds-light.svg' : widgetBasePath + 'images/config-feeds-dark.svg';
+    $scope.feedRules = $scope.isLightTheme ? widgetBasePath + 'images/feed-rules-light.svg' : widgetBasePath + 'images/feed-rules-dark.svg';
+    $scope.finishInfoGraphics = widgetBasePath + 'images/finish.png';
     $scope.widgetCSS = widgetBasePath + 'widgetAssets/css/wizard-style.css';
+    $scope.widgetScript = widgetBasePath + 'widgetAssets/js/threatIntelManagementConfiguration.service.js'
+    const fortiGuardConnectorName = 'Fortinet FortiGuard Threat Intelligence';
 
     init();
 
     function init() {
-      $scope.isFortiGuardConectorInsttalled = true;
+      $scope.isFortiGuardConectorInstalled = true;
+
       appModulesService.load(true).then(function (modules) {
         modules = $filter('playbookModules')(modules);
         $scope.modules = currentPermissionsService.availablePermissions(modules, 'create');
       });
+      $scope.allowPlaybookEdit = currentPermissionsService.availablePermission('workflows', 'create') || currentPermissionsService.availablePermission('workflows', 'update');
     }
 
     function toggleSelectFeedsSettings(event) {
@@ -63,7 +75,7 @@
         threatIntelManagementConfigurationService.installConnector(connector)
           .then(resp => {
             const importJobId = resp.data.importJob;
-            threatIntelManagementConfigurationService.getInstallationProgress(importJobId, connector)
+            threatIntelManagementConfigurationService.getConnectorInstallationProgress(importJobId, connector)
               .then(() => {
                 connector.installed = true;
                 installSequentially(index + 1);
@@ -92,26 +104,23 @@
     }
 
     function moveToSelectConnector() {
-      threatIntelManagementConfigurationService.getFeedConnectors('Fortinet FortiGuard Threat Intelligence').then(function (response) {
-        $scope.fortiGuardConector = response.data['hydra:member'][0];
-        if ($scope.fortiGuardConector.installed === false) {
-          $scope.isFortiGuardConectorInsttalled = false;
-          threatIntelManagementConfigurationService.installConnector($scope.fortiGuardConector)
+      threatIntelManagementConfigurationService.getFeedConnectors(fortiGuardConnectorName).then(function (response) {
+        var fortiGuardConnector = response.data['hydra:member'][0];
+        if (fortiGuardConnector.installed === false) {
+          $scope.isFortiGuardConectorInstalled = false;
+          threatIntelManagementConfigurationService.installConnector(fortiGuardConnector)
             .then(resp => {
               const importJobId = resp.data.importJob;
-              threatIntelManagementConfigurationService.getInstallationProgress(importJobId, $scope.fortiGuardConector)
+              threatIntelManagementConfigurationService.getConnectorInstallationProgress(importJobId, fortiGuardConnector)
                 .then(() => {
-                  //$scope.fortiGuardConector.selectConnector = true;
                   threatIntelManagementConfigurationService.getFeedConnectors().then(function (response) {
                     $scope.feedConnectors = response.data['hydra:member'];
                     $scope.feedConnectors.sort((firstItem, secondItem) => secondItem.installed - firstItem.installed);
-                    //$scope.installedConnectors = $scope.feedConnectors.filter(connector => connector.installed === true);
                     $scope.feedConnectors.forEach(feedConnector => {
-                      //feedConnector.toggleSelectFeeds = false;
-                      $scope.isFortiGuardConectorInsttalled = true;
+                      $scope.isFortiGuardConectorInstalled = true;
                       feedConnector.selectConnector = feedConnector.installed ? true : false;
-                      WizardHandler.wizard('timSolutionpackWizard').next();
                     });
+                    WizardHandler.wizard('timSolutionpackWizard').next();
                   });
                 })
                 .catch(error => {
@@ -129,10 +138,10 @@
             $scope.feedConnectors = response.data['hydra:member'];
             $scope.feedConnectors.sort((firstItem, secondItem) => secondItem.installed - firstItem.installed);
             $scope.feedConnectors.forEach(feedConnector => {
-              $scope.isFortiGuardConectorInsttalled = true;
+              $scope.isFortiGuardConectorInstalled = true;
               feedConnector.selectConnector = feedConnector.installed ? true : false;
-              WizardHandler.wizard('timSolutionpackWizard').next();
             });
+            WizardHandler.wizard('timSolutionpackWizard').next();
           });
         }
       });
@@ -140,6 +149,8 @@
 
     function moveToConfigureConnector() {
       $scope.fetchingAvailableConnectors = false;
+      $scope.installedConnectors = $scope.feedConnectors.filter(connector => connector.installed === true && connector.selectConnector === true);
+      loadActiveTab($state.params.tabIndex, $state.params.tab);
       WizardHandler.wizard('timSolutionpackWizard').next();
     }
   }
