@@ -259,4 +259,252 @@
             </button>
         </div>
     </wz-step>
+    <wz-step wz-title="Configure Feed Integrations" wz-order="4" class="ingestion-modal-padding full-width">
+        <form name="params.timConfigForm">
+            <div class="full-width wz-step-height padding-bottom-md solutionpack-wizard-modal-body">
+                <div class="overflow-auto">
+                    <div class="display-table fixed-table-layout full-height full-width">
+                        <div class="full-height display-table-cell vertical-align-middle">
+                            <div
+                                class="display-flex full-width overflow-auto solutionpack-wizard-modal-body wz-step-height">
+                                <uib-tabset active="params.activeTab" class="margin-top-11 width-100pt">
+                                    <uib-tab data-ng-repeat="timTool in installedConnectors track by $index"
+                                        index="$index" heading="{{ timTool.label }}"
+                                        data-ng-click="loadActiveTab($index)">
+                                        <div class="container full-width">
+                                            <div class="col-md-6 display-flex align-items-center">
+                                                <div class="full-width info-graphic-margin">
+                                                    <img class="img-responsive" src="{{configFeeds}}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 padding-left-0 prerequisites-section">
+                                                <div
+                                                    class="font-size-25 line-height-1 margin-bottom-lg margin-top-18 muted-80">
+                                                    Configure {{ timTool.label }} Integration</div>
+                                                <div class="form-group">
+                                                    <uib-accordion>
+                                                        <div uib-accordion-group
+                                                            id="accordion-connector-config-{{ $index }}"
+                                                            class="panel-default" is-open="true">
+                                                            <uib-accordion-heading>
+                                                                <div ng-click="toggleConnectorConfigSettings($index)"
+                                                                    data-ng-class="{'queue-text-active-color': toggleConnectorConfig[$index]}">
+                                                                    <div class="margin-right-lg pull-left"><span
+                                                                            class="queue-card-actions">&nbsp;<i
+                                                                                class="fa {{ toggleConnectorConfig[$index] ? 'fa-chevron-down' : 'fa-chevron-right'}}"></i></span>
+                                                                    </div>
+                                                                    <div
+                                                                        class="pull-left queue-card-header-text margin-right-3">
+                                                                        Configuration Parameters
+                                                                    </div>
+                                                                    <div class="clearfix"></div>
+                                                                </div>
+                                                            </uib-accordion-heading>
+                                                            <div ng-form="formHolder.connectorForm[$index]"
+                                                                name="formHolder.connectorForm[$index]">
+                                                                <div id="timConnectorWizard-{{$index}}"
+                                                                    class="margin-top-negative-20 margin-top-md padding-left-0 padding-right-0 tim-connector-config-width">
+                                                                    <div data-ng-if="!connectorProcessing">
+                                                                        <widget-connector-configuration-component
+                                                                            content-detail="timTool"
+                                                                            close-panel="handleClose()" owners="owners"
+                                                                            tab-index="$index"
+                                                                            ng-if="params.activeTab === $index"></widget-connector-configuration-component>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </uib-accordion>
+                                                </div>
+                                                <div class="form-group margin-top-negative-10">
+                                                    <uib-accordion close-others="true">
+                                                        <div is-open="healthyConnectorsParams[$index].ingestionPlaybook.ingestionConnector.toggleAccordion"
+                                                            uib-accordion-group class="panel-default"
+                                                            id="accordion-params-config-{{ $index }}"
+                                                            is-disabled="!isConnectorHealthy[$index]"
+                                                            style="width: 100%;">
+                                                            <uib-accordion-heading class="padding-md">
+                                                                <div class="display-flex">
+                                                                    <div ng-click="toggleParametersSettings($index)"
+                                                                        data-ng-class="{'queue-text-active-color': healthyConnectorsParams[$index].ingestionPlaybook.ingestionConnector.toggleAccordion}">
+                                                                        <div class="margin-right-lg pull-left">
+                                                                            <span>&nbsp;<i
+                                                                                    class="fa {{ toggleParametersConfig[$index] ? 'fa-chevron-down' : 'fa-chevron-right'}}""></i></span>
+                                                                        </div>
+                                                                        <div
+                                                                            class=" pull-left queue-card-header-text
+                                                                                    margin-right-3">
+                                                                                    Data Ingestion Parameters
+                                                                        </div>
+                                                                        <div class="clearfix"></div>
+                                                                    </div>
+                                                                </div>
+                                                            </uib-accordion-heading>
+                                                            <div data-ng-if="healthyConnectorsParams[$index].ingestionPlaybook.ingestionConnector.toggleAccordion"
+                                                                class="margin-top-negative-20">
+                                                                <div
+                                                                    class="margin-top-negative-10 padding-left-lg padding-right-lg overflow-auto query-section">
+                                                                    <div ng-form="params.timConfigForm[healthyConnectorsParams[$index].ingestionPlaybook.ingestionConnector.name]"
+                                                                        name="params.timConfigForm[healthyConnectorsParams[$index].ingestionPlaybook.ingestionConnector.name]"
+                                                                        data-ng-if="healthyConnectorsParams[$index].ingestionPlaybook.fetchOperation">
+                                                                        <cs-connector-field-renderer
+                                                                            data-cs-form="params.timConfigForm[healthyConnectorsParams[$index].ingestionPlaybook.ingestionConnector.name]"
+                                                                            data-enable-jinja="false"
+                                                                            data-json-fields="healthyConnectorsParams[$index].ingestionPlaybook.fetchOperation"
+                                                                            data-params="healthyConnectorsParams[$index].ingestionPlaybook.fetchConfiguration"
+                                                                            data-connector-data="{'connector':healthyConnectorsParams[$index].ingestionPlaybook.ingestionConnector,'version':ingestionDetails.ingestionPlaybook.ingestionConnector.version, 'configuration':ingestionDetails.ingestionPlaybook.ingestionConnector.configuration}"
+                                                                            data-on-field-change="configFieldChanged"
+                                                                            data-show-subtitle="true">
+                                                                        </cs-connector-field-renderer>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="margin-15">
+                                                                    <button id="params-edit-save"
+                                                                        data-ng-if="paramsUpdating === false && allowPlaybookEdit"
+                                                                        class="btn btn-sm btn-primary"
+                                                                        data-ng-disabled="!params.timConfigForm[healthyConnectorsParams[$index].ingestionPlaybook.ingestionConnector.name].$dirty"
+                                                                        data-ng-click="saveParams(params.timConfigForm[healthyConnectorsParams[$index].ingestionPlaybook.ingestionConnector.name], $index)">
+                                                                        <i
+                                                                            class="icon icon-check margin-right-sm"></i>Save
+                                                                    </button>
+                                                                    <button data-ng-if="paramsUpdating === true"
+                                                                        type="button" class="btn btn-sm btn-primary"
+                                                                        ng-disabled="paramsUpdating === true"
+                                                                        id="saving-edit-params">
+                                                                        <cs-spinner
+                                                                            class="pull-left margin-top-xsm state-wait button-spinner margin-right-sm"
+                                                                            data-show-background="true"
+                                                                            data-no-margin="margin-0"></cs-spinner>Saving
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </uib-accordion>
+                                                </div>
+                                                <div class="form-group margin-top-negative-10">
+                                                    <uib-accordion close-others="true">
+                                                        <div is-open="scheduleJsonData.ingestionPlaybook.ingestionConnector.toggleAccordion"
+                                                            uib-accordion-group class="panel-default"
+                                                            id="accordion-schedule-config-{{ $index }}"
+                                                            is-disabled="!isConnectorHealthy[$index]"
+                                                            style="width: 100%;">
+                                                            <uib-accordion-heading class="padding-md">
+                                                                <div class="display-flex">
+                                                                    <div ng-click="toggleScheduleConfigSettings($index)"
+                                                                        data-ng-class="{'queue-text-active-color': scheduleJsonData.ingestionPlaybook.ingestionConnector.toggleAccordion
+                                                                        }">
+                                                                        <div class="margin-right-lg pull-left">
+                                                                            <span>&nbsp;<i
+                                                                                    class="fa {{ toggleScheduleConfig[$index] ? 'fa-chevron-down' : 'fa-chevron-right'}}"></i></span>
+                                                                        </div>
+                                                                        <div
+                                                                            class="pull-left queue-card-header-text margin-right-3">
+                                                                            Data Ingestion Schedule Setting
+                                                                        </div>
+                                                                        <div class="clearfix"></div>
+                                                                    </div>
+                                                                </div>
+                                                            </uib-accordion-heading>
+                                                            <div data-ng-if="scheduleJsonData.ingestionPlaybook.ingestionConnector.toggleAccordion"
+                                                                class="padding-left-lg margin-top-negative-20">
+                                                                <div
+                                                                    class="padding-left-lg padding-right-lg overflow-auto query-section">
+                                                                    <div
+                                                                        data-ng-if="scheduleJsonData.ingestionPlaybook.ingestPlaybook">
+                                                                        <div class="margin-left-md"
+                                                                            data-tim-schedule-playbook
+                                                                            view-widget-vars="viewWidgetVars"
+                                                                            json-data="scheduleJsonData">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </uib-accordion>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </uib-tab>
+                                </uib-tabset>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ingestion-modal-footer">
+                <button type="button" class="btn btn-sm btn-second-primary margin-top-lg margin-left-lg"
+                    id="select-connector-back-btn" data-ng-click="backToSelectConnector()"><i
+                        class="fa fa-chevron-left margin-right-sm"></i>Back</button>
+                <button type="button" class="btn btn-primary pull-right btn-sm margin-top-lg margin-right-lg"
+                    data-ng-disabled="feedConfigured" data-ng-click="moveToFeedRules()" id="feed-rule-next-btn-config">
+                    <span data-ng-if="feedConfigured  === true">Validating Feed Integrations...</span>
+                    <span data-ng-if="feedConfigured === false">Feed Rules</span>
+                    <i class="fa margin-left-sm"
+                        data-ng-class="feedConfigured ? 'fa-spin fa-spinner' : 'fa-chevron-right'"></i>
+                </button>
+            </div>
+        </form>
+    </wz-step>
+    <wz-step wz-title="Enable Feed Rules" wz-order="5" class="ingestion-modal-padding full-width">
+        <div class="full-width wz-step-height padding-bottom-md solutionpack-wizard-modal-body">
+            <div class="full-height overflow-auto">
+                <div class="display-table fixed-table-layout full-height full-width">
+                    <div class="full-height display-table-cell vertical-align-middle">
+                        <div class="col-md-6 display-flex" style="justify-content: center">
+                            <img class="img-responsive padding-top-70 step-image" src="{{feedRules}}">
+                        </div>
+                        <div class="col-md-6 prerequisites-section padding-bottom-30 padding-left-0 padding-right-30 padding-top-30">
+                            <div class="font-size-30 muted-80 line-height-1 padding-bottom-md">Schedule Feed
+                                Integrations</div>
+                            <p class="font-Size-13 muted"><span>On this page, you can configure the schedule base
+                                    ingestions of the feeds i.e. you can specify the polling frequency of Feeds, so that
+                                    Feeds gets pulled from installed Feed integrations into FortiSOAR.</span></p>
+                            <h6 class="font-weight-normal margin-bottom-sm modal-title text-transform-none">Schedule
+                                Setting</h6>
+                            <p class="font-Size-13 muted">
+                                <span>In the Configure Schedule Settings section, specify the Cron expression, for
+                                    example, if you want to pull data from Feed sources every morning at 5 a.m., click
+                                    Daily, in the hour box enter 5, and in the minute box, enter 0.</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="ingestion-modal-footer">
+            <button type="button" class="btn btn-sm btn-second-primary margin-top-lg margin-left-lg"
+                id="config-feed-back-btn" data-ng-click="backToConfigConnector()"><i
+                    class="fa fa-chevron-left margin-right-sm"></i>Back</button>
+            <button type="button" class="btn btn-primary pull-right btn-sm margin-top-lg margin-right-lg"
+                data-ng-click="moveToFinish()" id="finish-next-btn">Next<i
+                    class="fa fa-chevron-right margin-left-sm"></i>
+            </button>
+        </div>
+    </wz-step>
+    <wz-step wz-title="Finish" wz-order="6" class="ingestion-modal-padding wizard-first-step">
+        <div class="full-width wz-step-height padding-bottom-md solutionpack-wizard-modal-body">
+            <div class="full-height overflow-auto">
+                <div class="display-table fixed-table-layout full-height full-width">
+                    <div class="full-height display-table-cell vertical-align-middle">
+                        <div class="col-md-6 display-flex" style="justify-content: center">
+                            <img class="img-responsive" src="{{finishInfoGraphics}}">
+                        </div>
+                        <div class="col-md-6 prerequisites-section padding-bottom-25 padding-left-0">
+                            <div class="font-size-30 muted-80 line-height-1">Threat Intel Management</div>
+                            <br />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="ingestion-modal-footer">
+            <button type="button" class="btn btn-sm btn-second-primary margin-top-lg margin-left-lg"
+                id="solutionpack-configure-back-btn" data-ng-click="backFeedRules()"><i
+                    class="fa fa-chevron-left margin-right-sm"></i>Back</button>
+            <button type="button" class="btn btn-primary pull-right btn-sm margin-top-lg margin-right-lg"
+                data-ng-click="close()" id="solutionpack-configure-finish-btn">Finish<i
+                    class="fa fa-chevron-right margin-left-sm"></i>
+            </button>
+        </div>
+    </wz-step>
 </wizard>
