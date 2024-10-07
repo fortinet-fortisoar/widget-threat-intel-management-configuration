@@ -9,49 +9,71 @@
     .module('cybersponse')
     .controller('threatIntelManagementConfiguration100Ctrl', threatIntelManagementConfiguration100Ctrl);
 
-  threatIntelManagementConfiguration100Ctrl.$inject = ['$scope', 'threatIntelManagementConfigurationService', 'WizardHandler', '$controller', '$state', 'connectorService', 'currentPermissionsService', 'CommonUtils', 'API', '_', '$filter', '$q', 'dataIngestionService', 'PagedCollection', '$resource', 'FIXED_MODULE', 'Entity', 'playbookService', 'translationService', 'toaster', 'appModulesService', 'widgetBasePath', '$rootScope'];
+  threatIntelManagementConfiguration100Ctrl.$inject = ['$scope', 'threatIntelManagementConfigurationService', 'widgetDataIngestionService', 'WizardHandler', '$controller', '$state', 'connectorService', 'currentPermissionsService', 'CommonUtils', 'API', '_', '$filter', '$http', 'dataIngestionService', 'PagedCollection', '$resource', 'FIXED_MODULE', 'Entity', 'playbookService', 'translationService', 'toaster', 'appModulesService', 'widgetBasePath', '$rootScope', '$timeout', 'ALL_RECORDS_SIZE'];
 
-  function threatIntelManagementConfiguration100Ctrl($scope, threatIntelManagementConfigurationService, WizardHandler, $controller, $state, connectorService, currentPermissionsService, CommonUtils, API, _, $filter, $q, dataIngestionService, PagedCollection, $resource, FIXED_MODULE, Entity, playbookService, translationService, toaster, appModulesService, widgetBasePath, $rootScope) {
+  function threatIntelManagementConfiguration100Ctrl($scope, threatIntelManagementConfigurationService, widgetDataIngestionService, WizardHandler, $controller, $state, connectorService, currentPermissionsService, CommonUtils, API, _, $filter, $http, dataIngestionService, PagedCollection, $resource, FIXED_MODULE, Entity, playbookService, translationService, toaster, appModulesService, widgetBasePath, $rootScope, $timeout, ALL_RECORDS_SIZE) {
     $controller('BaseConnectorCtrl', {
       $scope: $scope
     });
     $scope.backToStartPage = backToStartPage;
-    $scope.moveVersionControlNext = moveVersionControlNext;
     $scope.backToConfigConnector = backToConfigConnector;
     $scope.moveToConfigureConnector = moveToConfigureConnector;
     $scope.backToinstallConnector = backToinstallConnector;
     $scope.moveToSelectConnector = moveToSelectConnector;
     $scope.backToSelectConnector = backToSelectConnector;
     $scope.moveToFeedRules = moveToFeedRules;
-    $scope.backFeedRules = backFeedRules;
+    $scope.backToFeedRules = backToFeedRules;
     $scope.configFieldChanged = configFieldChanged;
     $scope.moveToFinish = moveToFinish;
     $scope.installConnector = installConnector;
+    $scope.close = close;
     $scope.toggleSelectFeedsSettings = toggleSelectFeedsSettings;
     $scope.toggleConnectorConfigSettings = toggleConnectorConfigSettings;
-    $scope.paramsUpdating = false;
-    $scope.feedConfigured = false;
+    $scope.dataIngestionParamsUpdating = false;
+    $scope.areFeedConnectorsConfigured = false;
     $scope.toggleConnectorConfig = [];
     $scope.toggleParametersConfig = [];
     $scope.toggleScheduleConfig = [];
     $scope.toggleParametersSettings = toggleParametersSettings;
-    $scope.toggleScheduleSettings = toggleScheduleSettings;
     $scope.toggleScheduleConfigSettings = toggleScheduleConfigSettings;
+    $scope.toggleFeedRules = toggleFeedRules;
     $scope.saveParams = saveParams;
     $scope.allConnectorsInstalled = false;
     $scope.loadActiveTab = loadActiveTab;
     $scope.feedConnectors = [];
-    $scope.isConnectorHealthy = [];
+    $scope.healthyConnectors = [];
     $scope.installedConnectors = [];
     $scope.samplePlaybookEntity = {};
     $scope.ingestMethodActions = {};
     $scope.searchQuery = '';
-    $scope.availableConnectors = [];
     $scope.healthyConnectorsParams = [];
     $scope.connectorHealthStatus = [];
     $scope.connectorParamsStatus = [];
     $scope.scheduleJsonData = undefined;
-    $scope.params = { activeTab: 0 };
+    $scope.params = {
+      activeTab: 0
+    };
+    $scope.feedRules = {
+      highConfidenceThreatFeeds: {
+        enabled: true,
+        open: true,
+        name: 'High Confidence Threat Feed Block',
+        feedConfidenceThreshold: 70
+      },
+      feedToIndicatorLinking: {
+        enabled: true,
+        open: true,
+        name: 'Feed To Indicator Linking',
+        feedConfidenceThreshold: 70
+      },
+      unstructuredFeedsSupport: {
+        enabled: true,
+        open: true,
+        name: 'Unstructured Feeds Support',
+        ingestFeedsFromFile: true,
+        ingestFeedsFromEmail: false
+      }
+    };
     $scope.connectorFetchIndex = {};
     $scope.connectorConfigIndex = {};
     $scope.isLightTheme = $rootScope.theme.id === 'light';
@@ -60,30 +82,34 @@
     $scope.feedSources = $scope.isLightTheme ? widgetBasePath + 'images/feed-sources-light.svg' : widgetBasePath + 'images/feed-sources-dark.svg';
     $scope.installFeeds = $scope.isLightTheme ? widgetBasePath + 'images/install-feeds-light.svg' : widgetBasePath + 'images/install-feeds-dark.svg';
     $scope.configFeeds = $scope.isLightTheme ? widgetBasePath + 'images/config-feeds-light.svg' : widgetBasePath + 'images/config-feeds-dark.svg';
-    $scope.feedRules = $scope.isLightTheme ? widgetBasePath + 'images/feed-rules-light.svg' : widgetBasePath + 'images/feed-rules-dark.svg';
+    $scope.feedRulesImg = $scope.isLightTheme ? widgetBasePath + 'images/feed-rules-light.svg' : widgetBasePath + 'images/feed-rules-dark.svg';
     $scope.finishInfoGraphics = widgetBasePath + 'images/finish.png';
     $scope.widgetCSS = widgetBasePath + 'widgetAssets/css/wizard-style.css';
-    $scope.widgetScript = widgetBasePath + 'widgetAssets/js/threatIntelManagementConfiguration.service.js'
-    $scope.ingestionRecordTags = {
-      dataingestion: '/api/3/tags/dataingestion',
-      create: '/api/3/tags/create',
-      ingest: '/api/3/tags/ingest',
-      fetch: '/api/3/tags/fetch',
-      update: '/api/3/tags/update',
-      connector: '/api/3/tags/'
-    };
     const fortiGuardConnectorName = 'Fortinet FortiGuard Threat Intelligence';
 
     init();
 
     function init() {
-      $scope.isFortiGuardConectorInstalled = true;
+      $scope.isFortiGuardConnectorInstalled = true;
 
       appModulesService.load(true).then(function (modules) {
         modules = $filter('playbookModules')(modules);
         $scope.modules = currentPermissionsService.availablePermissions(modules, 'create');
       });
       $scope.allowPlaybookEdit = currentPermissionsService.availablePermission('workflows', 'create') || currentPermissionsService.availablePermission('workflows', 'update');
+    }
+
+    function close() {
+      $timeout(function () { $window.location.reload(); }, 3000);
+      $state.go('main.modules.list', { module: 'threat_intel_feeds' }, { reload: true });
+      $scope.$parent.$parent.$parent.$ctrl.handleClose();
+    }
+
+    function toggleFeedRules(feedRule, $event) {
+      if ($event && $event.target.className === 'switch-slider') {
+        feedRule.enabled = !feedRule.enabled;
+        feedRule.open = !feedRule.open;
+      }
     }
 
     function toggleConnectorConfigSettings(index) {
@@ -102,27 +128,10 @@
       $scope.toggleParametersConfig[index] = !$scope.toggleParametersConfig[index];
     }
 
-    function toggleScheduleSettings(connector, minimizeOthers) {
-      if (minimizeOthers && $scope.jsonData && $scope.jsonData.length > 0) {
-        $scope.jsonData.forEach(pack => {
-          pack.ingestionPlaybook.ingestionConnector.toggleAccordion = (pack.ingestionPlaybook.ingestionConnector.label === connector.label) ? true : false;
-        });
-      }
-      connector.toggleAccordion = !connector.toggleAccordion;
-    }
-
     function installConnector() {
-      WizardHandler.wizard('timSolutionpackWizard').next();
-      $scope.getSelectedConnectorsCount = function () {
-        var feedConnectors = Array.isArray($scope.feedConnectors) ? $scope.feedConnectors : [];
-        var installedConnectors = Array.isArray($scope.installedConnectors) ? $scope.installedConnectors : [];
-
-        return feedConnectors.filter(function (connector) {
-          return connector.selectConnector;
-        }).length + installedConnectors.length;
-      };
+      WizardHandler.wizard('timSolutionpackConfigWizard').next();
       const selectedConnectors = $scope.feedConnectors.filter(pack => pack.selectConnector === true && pack.installed === false);
-
+      $scope.getSelectedConnectorsCount = selectedConnectors.length + ($scope.feedConnectors.filter(pack => pack.selectConnector === true && pack.installed === true)).length
       function installSequentially(index) {
         if (index >= selectedConnectors.length) {
           $scope.allConnectorsInstalled = true;
@@ -152,7 +161,7 @@
 
     function loadActiveTab(tabIndex) {
       $scope.scheduleJsonData = undefined;
-      $scope.isConnectorHealthy[tabIndex] = false;
+      $scope.healthyConnectors[tabIndex] = false;
       if (CommonUtils.isUndefined(tabIndex)) {
         if (CommonUtils.isUndefined($scope.params.activeTab)) {
           $scope.params = {
@@ -170,48 +179,11 @@
     }
 
     function _loadConnectorDetails(tabIndex, installedConnector) {
-      $scope.activeTabIndex = tabIndex;
       $scope.connectorProcessing = true;
       connectorService.getConnector(installedConnector.name, installedConnector.version).then(function (connector) {
         installedConnector.connectorInfo = angular.copy(connector);
         installedConnector.connectorInfo.baseId = angular.copy(connector.id);
         $scope.connectorProcessing = false;
-        if (connector.configuration.length > 0) {
-          const defaultConfiguredConnector = _.find(connector.configuration, { default: true });
-          if (!CommonUtils.isUndefined(defaultConfiguredConnector)) {
-            connectorService.getConnectorHealth(installedConnector, defaultConfiguredConnector.config_id, defaultConfiguredConnector.agent).then(function (data) {
-              if (data.status === "Available") {
-                var connectorInfo = {
-                  "connector": {
-                    "name": 'dataingestion',
-                    "label": installedConnector.label,
-                    "version": installedConnector.version,
-                    "uuid": installedConnector.uuid,
-                  },
-                  "config": {
-                    "name": defaultConfiguredConnector.name,
-                    "config_id": defaultConfiguredConnector.config_id,
-                    "sample_collections_iri": $filter('getEndPathName')(connector.playbook_collections[0]['@id'])
-                  }
-                };
-                $scope.availableConnectors.push(connectorInfo);
-                _.assign(connector, { "configuration": defaultConfiguredConnector });
-                _.assign(connector, { "playbook_collections": connector.playbook_collections[0] });
-                _.assign(connector, { "uuid": installedConnector.uuid });
-                _processHealthyConnectors(tabIndex, [connector]);
-              }
-            });
-          }
-          else {
-            toaster.error({
-              body: 'The connector "' + installedConnector.name + '" does not have a default configuration. At least one configuration  must be set as default.'
-            });
-            return;
-          }
-        }
-        else {
-          console.log('Connector is not configured:', installedConnector.name);
-        }
         if (!connector) {
           toaster.error({
             body: 'The Connector "' + installedConnector.name + '" is not installed. Install the connector and re-run this wizard to complete the configuration'
@@ -228,52 +200,87 @@
       $scope.scheduleID = data.scheduleId;
     });
 
+    $scope.$on('healthCheckDetails', function (event, connectorDetails) {
+      var connector = angular.copy(connectorDetails);
+      const connectorConfig = _.find(connector.connectorInfo.configuration, { config_id: connector.config_id });
+      if (connectorConfig.status === "Available") {
+        _.assign(connector.connectorInfo, { "configuration": connectorConfig });
+        _.assign(connector.connectorInfo, { "playbook_collections": connector.connectorInfo.playbook_collections[0] });
+        _.assign(connector.connectorInfo, { "uuid": $scope.installedConnectors[connector.tabIndex].uuid });
+        _processDataIngestion(connector.tabIndex, connector.connectorInfo);
+      }
+      else {
+        var paramsConfig = document.getElementById('accordion-params-config-' + connector.tabIndex);
+        if (_.includes(paramsConfig.childNodes[2].classList, "in")) {
+          paramsConfig.childNodes[2].classList.replace('in', null);
+          toggleParametersSettings(connector.tabIndex);
+        }
+        var schedulrConfig = document.getElementById('accordion-schedule-config-' + connector.tabIndex);
+        if (_.includes(schedulrConfig.childNodes[2].classList, "in")) {
+          schedulrConfig.childNodes[2].classList.replace('in', null);
+          toggleScheduleConfigSettings(connector.tabIndex);
+        }
+        $scope.healthyConnectors[connector.tabIndex] = false;
+      }
+    });
+
     function backToStartPage() {
-      WizardHandler.wizard('timSolutionpackWizard').previous();
-    }
-
-    function backToSelectConnector() {
-      $scope.feedConfigured = false;
-      WizardHandler.wizard('timSolutionpackWizard').previous();
-    }
-
-    function backFeedRules(){
-      WizardHandler.wizard('timSolutionpackWizard').previous();
-    }
-
-    function moveToFinish(){
-      WizardHandler.wizard('timSolutionpackWizard').next();
-    }
-
-    function backToConfigConnector() {
-      $scope.feedConfigured = false;
-      WizardHandler.wizard('timSolutionpackWizard').previous();
+      WizardHandler.wizard('timSolutionpackConfigWizard').previous();
     }
 
     function backToinstallConnector() {
+      $scope.areFeedConnectorsConfigured = false;
+      WizardHandler.wizard('timSolutionpackConfigWizard').previous();
+    }
+
+    function backToFeedRules() {
+      WizardHandler.wizard('timSolutionpackConfigWizard').previous();
+    }
+
+    function moveToFinish() {
+      $scope.displayFeedIntegrations = _.map($scope.installedConnectors, "label").join(', ');
+      var queryPayload =
+      {
+        "request": $scope.feedRules
+      }
+      var queryUrl = API.MANUAL_TRIGGER + '6a4c2425-d0f8-454c-aae4-9a9bf5e6c171';
+      $http.post(queryUrl, queryPayload).then(function (response) {
+        WizardHandler.wizard('timSolutionpackConfigWizard').next();
+        console.log(response);
+      });
+    }
+
+    function backToConfigConnector() {
+      $scope.areFeedConnectorsConfigured = false;
+      WizardHandler.wizard('timSolutionpackConfigWizard').previous();
+    }
+
+    function backToSelectConnector() {
       $scope.feedConnectors.sort((firstItem, secondItem) => secondItem.installed - firstItem.installed);
       $scope.allConnectorsInstalled = false;
-      WizardHandler.wizard('timSolutionpackWizard').previous();
+      WizardHandler.wizard('timSolutionpackConfigWizard').previous();
     }
 
     function moveToSelectConnector() {
       threatIntelManagementConfigurationService.getFeedConnectors(fortiGuardConnectorName).then(function (response) {
-        var fortiGuardConnector = response.data['hydra:member'][0];
-        if (fortiGuardConnector.installed === false) {
-          $scope.isFortiGuardConectorInstalled = false;
-          threatIntelManagementConfigurationService.installConnector(fortiGuardConnector)
+        $scope.fortiGuardConnector = response.data['hydra:member'][0];
+        if ($scope.fortiGuardConnector.installed === false) {
+          $scope.isFortiGuardConnectorInstalled = false;
+          threatIntelManagementConfigurationService.installConnector($scope.fortiGuardConnector)
             .then(resp => {
               const importJobId = resp.data.importJob;
-              threatIntelManagementConfigurationService.getConnectorInstallationProgress(importJobId, fortiGuardConnector)
+              threatIntelManagementConfigurationService.getConnectorInstallationProgress(importJobId, $scope.fortiGuardConnector)
                 .then(() => {
-                  threatIntelManagementConfigurationService.getFeedConnectors().then(function (response) {
-                    $scope.feedConnectors = response.data['hydra:member'];
-                    $scope.feedConnectors.sort((firstItem, secondItem) => secondItem.installed - firstItem.installed);
-                    $scope.feedConnectors.forEach(feedConnector => {
-                      $scope.isFortiGuardConectorInstalled = true;
-                      feedConnector.selectConnector = feedConnector.installed ? true : false;
+                  threatIntelManagementConfigurationService.configFortiGuardConnector($scope.fortiGuardConnector).then(() => {
+                    threatIntelManagementConfigurationService.getFeedConnectors().then(function (response) {
+                      $scope.feedConnectors = response.data['hydra:member'];
+                      $scope.feedConnectors.sort((firstItem, secondItem) => secondItem.installed - firstItem.installed);
+                      $scope.feedConnectors.forEach(feedConnector => {
+                        $scope.isFortiGuardConnectorInstalled = true;
+                        feedConnector.selectConnector = feedConnector.installed ? true : false;
+                      });
+                      WizardHandler.wizard('timSolutionpackConfigWizard').next();
                     });
-                    WizardHandler.wizard('timSolutionpackWizard').next();
                   });
                 })
                 .catch(error => {
@@ -287,51 +294,41 @@
             });
         }
         else {
-          threatIntelManagementConfigurationService.getFeedConnectors().then(function (response) {
-            $scope.feedConnectors = response.data['hydra:member'];
-            $scope.feedConnectors.sort((firstItem, secondItem) => secondItem.installed - firstItem.installed);
-            $scope.feedConnectors.forEach(feedConnector => {
-              $scope.isFortiGuardConectorInstalled = true;
-              feedConnector.selectConnector = feedConnector.installed ? true : false;
+          threatIntelManagementConfigurationService.configFortiGuardConnector($scope.fortiGuardConnector).then(() => {
+            threatIntelManagementConfigurationService.getFeedConnectors().then(function (response) {
+              $scope.feedConnectors = response.data['hydra:member'];
+              $scope.feedConnectors.sort((firstItem, secondItem) => secondItem.installed - firstItem.installed);
+              $scope.feedConnectors.forEach(feedConnector => {
+                $scope.isFortiGuardConnectorInstalled = true;
+                feedConnector.selectConnector = feedConnector.installed ? true : false;
+              });
+              WizardHandler.wizard('timSolutionpackConfigWizard').next();
             });
-            WizardHandler.wizard('timSolutionpackWizard').next();
           });
         }
       });
     }
 
-    function moveVersionControlNext() {
-      WizardHandler.wizard('timSolutionpackWizard').next();
-    }
-
-    function _processHealthyConnectors(tabIndex, healthyConnectors) {
+    function _processDataIngestion(tabIndex, healthyConnector) {
       // Return a promise to initiate the chain
       return new Promise((resolve, reject) => {
-        // Chain the promises sequentially
-        healthyConnectors.reduce((chain, healthyConnector) => {
-          return chain
-            .then(() => _cloneIngestionPlaybookCollection(healthyConnector))
-            .then(() => _prepareFetchSampleConfig(tabIndex, healthyConnector))
-            .then(() => _createSchedule($scope.healthyConnectorsParams[tabIndex]))
-            .then(() => {
-              // Execute the additional statements here
-              activateIngestionPlaybooks();
+        widgetDataIngestionService.cloneIngestionPlaybookCollection($scope, healthyConnector).then(function () {
+          widgetDataIngestionService.prepareFetchSampleConfig($scope, tabIndex, healthyConnector).then(function () {
+            widgetDataIngestionService.activateIngestionPlaybooks($scope.ingestCollectionUUID).then(function () {
+              _createDefaultSchedule($scope.healthyConnectorsParams[tabIndex]);
               $scope.scheduleJsonData = angular.copy($scope.healthyConnectorsParams[tabIndex]);
-              $scope.isConnectorHealthy[tabIndex] = true;
+              $scope.healthyConnectors[tabIndex] = true;
+              resolve();
             });
-        }, Promise.resolve())
-          .then(() => {
-            console.log('All healthyConnectors processed successfully.');
-            resolve(); // Resolve the main promise chain
-          })
-          .catch(error => {
-            console.error('Error processing healthyConnectors:', error);
-            reject(error); // Reject if there's an error
           });
+        }).catch(error => {
+          console.error('Error processing healthyConnectors:', error);
+          reject(error); // Reject if there's an error
+        });
       });
     }
 
-    function _createSchedule(ingestionConnectorDetails) {
+    function _createDefaultSchedule(ingestionConnectorDetails) {
       var queryBody = {
         name: "Ingestion_" + ingestionConnectorDetails.ingestionPlaybook.ingestionConnector.name + "_" + (ingestionConnectorDetails.ingestionPlaybook.ingestionConnector.configuration.name).replace(/\s+/g, '-') + "_" + ingestionConnectorDetails.ingestionPlaybook.ingestionConnector.configuration.config_id,
         "crontab": {
@@ -350,7 +347,7 @@
         },
         "enabled": true
       }
-      var url = API.WORKFLOW + 'api/scheduled/?depth=2&format=json&limit=30&ordering=-modified&search=' + ingestionConnectorDetails.ingestionPlaybook.ingestionConnector.configuration.config_id + '&task=workflow.tasks.periodic_task'
+      var url = API.WORKFLOW + 'api/scheduled/?depth=2&format=json&limit=' + ALL_RECORDS_SIZE + '&ordering=-modified&search=' + ingestionConnectorDetails.ingestionPlaybook.ingestionConnector.configuration.config_id + '&task=workflow.tasks.periodic_task'
       $resource(url).get({}).$promise.then(function (response) {
         if (response['hydra:member'].length === 0) {
           $resource(API.WORKFLOW + 'api/scheduled/?format').save(queryBody).$promise.then(function (postResponse) {
@@ -360,140 +357,6 @@
         else {
           console.log(response);
         }
-
-      });
-    }
-
-    function _cloneIngestionPlaybookCollection(healthyConnector) {
-      var connector = {
-        "name": 'dataingestion',
-        "label": healthyConnector.label,
-        "version": healthyConnector.version,
-        "uuid": healthyConnector.uuid,
-      };
-      var config = {
-        "name": healthyConnector.configuration.name,
-        "config_id": healthyConnector.configuration.config_id,
-        "sample_collections_iri": $filter('getEndPathName')(healthyConnector.playbook_collections['@id'])
-      };
-      // Initialize ingestCollectionUUID as undefined initially
-      let ingestCollectionUUID;
-      // Return the promise chain for _cloneIngestionPlaybookCollection
-      return connectorService.getIngestionPlaybookCollectionUUID({ config: config, connector: connector, label: 'Ingestion' })
-        .then(response => {
-          ingestCollectionUUID = response; // Capture ingestCollectionUUID from response
-          let _preparePlaybooksParams = {
-            config: config,
-            connector: connector,
-            ingestionCollectionUUID: ingestCollectionUUID,
-            selectedCollectionId: config.sample_collections_iri,
-            isIngestionCollection: true,
-            ingestionProcessing: true,
-            collectionChanged: false
-          };
-          return dataIngestionService.preparePlaybooksForIngestion(_preparePlaybooksParams);
-        })
-        .then(prepareResponse => {
-          var ingestSupportedPlaybooks = prepareResponse.ingestionSupportedPlaybooks;
-          var _saveIngestionParams = {
-            playbooks: ingestSupportedPlaybooks,
-            connector: connector,
-            ingestionCollectionUUID: ingestCollectionUUID, // Pass ingestCollectionUUID to _saveIngestionParams
-            isCollectionChanged: false,
-            isIngestionCollection: false
-          };
-          return dataIngestionService.saveIngestionPlaybooks(_saveIngestionParams);
-        })
-        .then(response => {
-          $scope.ingestMethodActions = {
-            'ingestionPlaybook': {
-              'fetchPlaybook': response.ingestPlabooks.fetch,
-              'ingestPlaybook': response.ingestPlabooks.ingest,
-              'createPlaybook': response.ingestPlabooks.create,
-              'updatePlaybook': response.ingestPlabooks.update
-            }
-          };
-          return Promise.resolve(); // Resolve promise to indicate completion
-        })
-        .catch(error => {
-          console.error('Error in _cloneIngestionPlaybookCollection:', error);
-          return Promise.reject(error); // Handle errors
-        });
-    }
-
-    function _prepareFetchSampleConfig(tabIndex, healthyConnector) {
-      let ingestionPlaybook = $scope.ingestMethodActions.ingestionPlaybook;
-      let connectorEntity = new Entity(FIXED_MODULE.PLAYBOOK);
-      ingestionPlaybook.fetchConfiguration = {};
-      ingestionPlaybook.fetchConfigurationCopy = {};
-      ingestionPlaybook.fetchOperation = null;
-      if (ingestionPlaybook.fetchPlaybook && ingestionPlaybook.fetchPlaybook['@id']) {
-        var playbookId = $filter('getEndPathName')(ingestionPlaybook.fetchPlaybook['@id']);
-        return connectorEntity.get(playbookId, { $relationships: true })
-          .then(() => {
-            ingestionPlaybook.fetchPlaybook = angular.extend(ingestionPlaybook.fetchPlaybook, connectorEntity.originalData);
-            let samplePlaybook = ingestionPlaybook.fetchPlaybook;
-
-            if (samplePlaybook && samplePlaybook.steps) {
-              let stepCount;
-              for (stepCount = 0; stepCount < samplePlaybook.steps.length; stepCount++) {
-                let step = samplePlaybook.steps[stepCount];
-                if (step.name.toLowerCase() === 'fetch') {
-                  $scope.connectorFetchIndex[healthyConnector.name] = {
-                    "fetchIndex": stepCount
-                  }
-                  ingestionPlaybook.fetchConfiguration = angular.copy(step.arguments.params);
-                  var opCount = 0;
-                  for (opCount = 0; opCount < healthyConnector.operations.length; opCount++) {
-                    if (healthyConnector.operations[opCount].operation === step.arguments.operation) {
-                      ingestionPlaybook.fetchOperation = angular.copy(healthyConnector.operations[opCount].parameters);
-                      break;
-                    }
-                  }
-                  break;
-                }
-                if (step.name.toLowerCase() === 'configuration') {
-                  $scope.connectorConfigIndex[healthyConnector.name] = {
-                    "configIndex": stepCount
-                  };
-                  ingestionPlaybook.fetchConfiguration = angular.copy(step.arguments);
-                } else if (step.name.toLowerCase() === 'start' && step.arguments.step_variables && step.arguments.step_variables._configuration_schema) {
-                  ingestionPlaybook.fetchOperation = angular.copy(JSON.parse(step.arguments.step_variables._configuration_schema));
-                }
-              }
-              if (ingestionPlaybook.fetchOperation) {
-                _populateValues(ingestionPlaybook.fetchOperation);
-              }
-            }
-            $scope.ingestMethodActions.ingestionPlaybook.fetchPlaybookCopy = angular.copy(ingestionPlaybook.fetchPlaybook);
-            $scope.healthyConnectorsParams[tabIndex] = angular.copy($scope.ingestMethodActions);
-            $scope.healthyConnectorsParams[tabIndex].ingestionPlaybook.ingestionConnector = healthyConnector;
-            $scope.samplePlaybookEntity[healthyConnector.name] = angular.copy(connectorEntity);
-            return Promise.resolve(); // Resolve promise to indicate completion
-          })
-          .catch(error => {
-            console.error('Error in prepareFetchSampleConfig:', error);
-            return Promise.reject(error); // Handle errors
-          });
-      }
-    }
-
-    function _populateValues(parameters) {
-      angular.forEach(parameters, function (parameter) {
-        if (parameter.name in $scope.ingestMethodActions.ingestionPlaybook.fetchConfiguration) {
-          parameter.value = $scope.ingestMethodActions.ingestionPlaybook.fetchConfiguration[parameter.name];
-        }
-        if (parameter.onchange) {
-          if (parameter.type === 'multiselect' && angular.isArray(parameter.value)) {
-            parameter.value.forEach(function (selected) {
-              if (parameter.onchange[selected]) {
-                _populateValues(parameter.onchange[selected]);
-              }
-            });
-          } else if (parameter.onchange[parameter.value]) {
-            _populateValues(parameter.onchange[parameter.value]);
-          }
-        }
       });
     }
 
@@ -502,28 +365,11 @@
     }
 
     function saveParams(timParamsForm, index) {
-      if (timParamsForm.$invalid) {
-        timParamsForm.$$parentForm.$setTouched();
-        timParamsForm.$$parentForm.$focusOnFirstError();
-        toaster.error({
-          body: 'Data Ingestion Parameters are not saved'
-        });
-        return;
-      }
-      $scope.paramsUpdating = true;
-      _updateConfigPrams([$scope.healthyConnectorsParams[index]]).then(() => {
-        $scope.paramsUpdating = false;
-        timParamsForm.$dirty = false;
-        $scope.connectorParamsStatus[index] = true;
-      }).catch(error => {
-        // Handle any errors if needed
-        console.error('Error in _updateConfigPrams:', error);
-      });
-      console.log(timParamsForm);
+      widgetDataIngestionService.saveDataIngestionParams($scope, timParamsForm, index)
     }
 
     function _checkConnectorHealth() {
-      $scope.feedConfigured = true;
+      $scope.areFeedConnectorsConfigured = true;
       var toasterMessage = undefined;
       $scope.installedConnectors.reduce((promise, installedConnector, index) => {
         return promise.then(() => {
@@ -555,8 +401,10 @@
           let indices = _.map(_.filter($scope.connectorHealthStatus, value => value === false), (value, index) => $scope.connectorHealthStatus.indexOf(value, index));
           const notConfigConnectors = _.uniq(indices).map(index => $scope.installedConnectors[index]);
           if (notConfigConnectors.length === 0) {
-            WizardHandler.wizard('timSolutionpackWizard').next();
-          } else {
+            WizardHandler.wizard('timSolutionpackConfigWizard').next();
+            _getExchangeConnectorDetails();
+          }
+          else {
             var feedToolIndex = $scope.installedConnectors.indexOf(notConfigConnectors[0]);
             let notConfigConnectorsLabel = notConfigConnectors.map(connectorLabel => connectorLabel.label);
             if (!CommonUtils.isUndefined(toasterMessage)) {
@@ -566,8 +414,10 @@
             loadActiveTab(feedToolIndex);
             var connectorConfig = document.getElementById('accordion-connector-config-' + feedToolIndex);
             if (!_.includes(connectorConfig.childNodes[2].classList, "in")) {
-              connectorConfig.childNodes[2].classList.add('in');
               toggleConnectorConfigSettings(feedToolIndex);
+              $timeout(function () {
+                connectorConfig.childNodes[2].classList.add('in');
+              }, 100);
             }
             var paramsConfig = document.getElementById('accordion-params-config-' + feedToolIndex);
             if (_.includes(paramsConfig.childNodes[2].classList, "in")) {
@@ -594,168 +444,51 @@
         .finally(() => {
           // This code will execute regardless of success or failure of the promises
           console.log('Finished processing all connectors.');
-          $scope.feedConfigured = false;
+          $scope.areFeedConnectorsConfigured = false;
         });
     }
 
-    async function _updateConfigPrams() {
-      for (let healthyConnectorsParam of _.filter($scope.healthyConnectorsParams, obj => !_.isEmpty(obj))) {
-        //let healthyConnectorsParam = $scope.healthyConnectorsParams;
-        // Step 1: Get filtered modules
-        $scope.filteredModules = _getIngestionModules($scope.modules, healthyConnectorsParam);
-        let moduleList = $scope.filteredModules.length > 0 ? $scope.filteredModules : [];
-        $scope.moduleType = $scope.filteredModules.length > 0 ? $scope.filteredModules[0].type : moduleList[0].type;
-        // Step 2: Validate existing playbook
-        healthyConnectorsParam.processing = false;
-        let selectedPlaybook = healthyConnectorsParam.ingestionPlaybook.fetchPlaybook;
-        healthyConnectorsParam.ingestionPlaybook.fetchConfigurationCopy = angular.copy(healthyConnectorsParam.ingestionPlaybook.fetchConfiguration);
-        if (playbookService.isTagAvailable(selectedPlaybook, 'fetch', $scope.ingestionRecordTags)) {
-          healthyConnectorsParam.processing = true;
-          // Step 3: Set fields asynchronously
-          try {
-            await setFields(moduleList);
-            // Step 4: Validate existing playbook after fields are set
-            if (_validateExistingPlaybook(healthyConnectorsParam)) {
-              let playbookId = $filter('getEndPathName')(selectedPlaybook['@id']);
-              let fetchModified = false;
-              let configModified = false;
-              $scope.fieldsObj = $scope.fieldsObj || {};
-              let playbookEntity = $scope.samplePlaybookEntity[healthyConnectorsParam.ingestionPlaybook.ingestionConnector.name];
-              let fetchIndex = _.isEmpty($scope.connectorFetchIndex) ? -1 : $scope.connectorFetchIndex[healthyConnectorsParam.ingestionPlaybook.ingestionConnector.name].fetchIndex;
-              let configIndex = _.isEmpty($scope.connectorConfigIndex) ? -1 : $scope.connectorConfigIndex[healthyConnectorsParam.ingestionPlaybook.ingestionConnector.name].configIndex;
-              // Step 5: Modify sample playbook data if needed
-              if (playbookEntity) {
-                var samplePlaybookData = playbookEntity.getData();
-                samplePlaybookData['@id'] = playbookEntity.originalData['@id'];
-                if (fetchIndex > -1 && (!angular.equals(samplePlaybookData.steps[fetchIndex].arguments.params, healthyConnectorsParam.ingestionPlaybook.fetchConfiguration))) {
-                  fetchModified = true;
-                  samplePlaybookData.steps[fetchIndex].arguments.params = angular.extend(samplePlaybookData.steps[fetchIndex].arguments.params, healthyConnectorsParam.ingestionPlaybook.fetchConfiguration);
-                } else if (configIndex > -1 && (!angular.equals(selectedPlaybook.steps[configIndex].arguments, healthyConnectorsParam.ingestionPlaybook.fetchConfiguration))) {
-                  configModified = true;
-                  selectedPlaybook.steps[configIndex].arguments = angular.extend(selectedPlaybook.steps[configIndex].arguments, healthyConnectorsParam.ingestionPlaybook.fetchConfiguration);
-                  samplePlaybookData.steps[configIndex].arguments = angular.copy(selectedPlaybook.steps[configIndex].arguments);
-                }
-                // Step 6: Save sample playbook entity if modified
-                if (fetchModified || configModified) {
-                  let samplePlaybook = playbookService.preparePlaybookForSave(samplePlaybookData);
-                  await playbookEntity.save(samplePlaybook, { $relationships: true });
-                }
-              }
-              // Step 7: Get data after modifying or if not modified
-              _getData(playbookId, selectedPlaybook, healthyConnectorsParam);
-            }
-          } catch (error) {
-            console.error('Error processing:', error);
-            healthyConnectorsParam.processing = false;
+    function _getExchangeConnectorDetails() {
+      var queryBody = {
+        "sort": [
+          {
+            "field": "featured",
+            "direction": "DESC"
+          },
+          {
+            "field": "label",
+            "direction": "ASC"
           }
-        } else {
-          healthyConnectorsParam.processing = false;
-        }
-      }
-    }
-
-    function _getIngestionModules(modules, healthyConnectorsParam) {
-      let modulesList = [];
-      angular.forEach(modules, function (module) {
-        if (_.indexOf(healthyConnectorsParam.ingestionPlaybook.ingestionConnector.ingestion_preferences.modules, module.type) > -1) {
-          modulesList.push(module);
-        }
-      });
-      return modulesList;
-    }
-
-    function setFields(moduleList, resetRecommendation) {
-      let defer = $q.defer();
-      let module = _.find($scope.filteredModules, function (module) {
-        return module.type === $scope.moduleType.toLowerCase();
-      });
-      if (angular.isUndefined(module)) {
-        let foundModuleInList = _.find(moduleList, function (item) { return item.type === $scope.moduleType; });
-        module = resetRecommendation === true ? foundModuleInList : ($scope.filteredModules.length > 0 ? $scope.filteredModules[0] : foundModuleInList || moduleList[0]);
-        $scope.moduleType = resetRecommendation === true ? $scope.moduleType : ($scope.filteredModules.length > 0 ? $scope.filteredModules[0].type : $scope.moduleType || moduleList[0].type);
-      }
-      if (!module) {
-        toaster.error({
-          body: translationService.instantTranslate(' is not a valid module! Please check whether module is present on the system.', { 'moduleName': $scope.moduleType })
-        });
-        defer.reject();
-      }
-      if (module) {
-        let entity = new Entity(module.type);
-        entity.loadFields().then(function () {
-          // let fields = entity.getFormFieldsArray();
-          $scope.fieldsObj = entity.getFormFields();
-          //setRecommendationFields(fields, resetRecommendation);
-          if (entity.uniqueConstraint && entity.uniqueConstraint.length > 0) {
-            uniqueConstraintFields = angular.copy(entity.uniqueConstraint[0][entity.module + '_unique'].columns);
-            //self.mapConstraintMsgToField(module.name);
-          } else {
-            uniqueConstraintFields = [];
-            constraintMessage = null;
+        ],
+        "limit": 30,
+        "logic": "AND",
+        "filters": [
+          {
+            "field": "type",
+            "operator": "in",
+            "value": [
+              "connector"
+            ]
+          },
+          {
+            "field": "name",
+            "operator": "eq",
+            "value": "exchange"
+          },
+          {
+            "field": "version",
+            "operator": "notlike",
+            "value": "%_dev"
           }
-          //clearSearchText();
-        }).finally(function () {
-          defer.resolve({});
-        });
-      }
-      return defer.promise;
-    }
-
-    function _validateExistingPlaybook(healthyConnectorsParam) {
-      let ingestTag = '#Ingest';
-      if (!healthyConnectorsParam.ingestionPlaybook.ingestPlaybook) {
-        toaster.error({
-          body: 'Playbook not available by tag name "' + ingestTag + '"'
-        });
-      }
-      return healthyConnectorsParam.ingestionPlaybook.ingestPlaybook;
-    }
-
-    function _getData(playbookId, selectedPlaybook, healthyConnectorsParam) {
-      healthyConnectorsParam.ingestionPlaybook.fetchPlaybookCopy = angular.copy(selectedPlaybook);
-      _setPlaybookParams(selectedPlaybook);
-      if (playbookService.isTagAvailable(selectedPlaybook, 'fetch', $scope.ingestionRecordTags) && $scope.configIndex > -1) {
-        selectedPlaybook.steps[$scope.configIndex].arguments = angular.extend(selectedPlaybook.steps[$scope.configIndex].arguments, healthyConnectorsParam.ingestionPlaybook.fetchConfiguration);
-      }
-
-    }
-
-    function _setPlaybookParams(selectedPlaybook) {
-      selectedPlaybook.allow_reference_inactive = true;
-      selectedPlaybook.priority = { itemValue: 'High' };
-      _addPayloadInStartStep(selectedPlaybook);
-    }
-
-    function _addPayloadInStartStep(selectedPlaybook) {
-      let triggerStep = _.find(selectedPlaybook.steps, function (step) {
-        return step['@id'] === selectedPlaybook.triggerStep;
-      });
-      triggerStep.arguments.request = triggerStep.arguments.request || {};
-      triggerStep.arguments.request.env_setup = true;
-    }
-
-    function activateIngestionPlaybooks(ingestCollectionUUID) {
-      let ingestionPlaybookPagedCollection = new PagedCollection('workflows', null, {
-        collection: ingestCollectionUUID
-      }, false);
-      ingestionPlaybookPagedCollection.load().then(function () {
-        if (ingestionPlaybookPagedCollection.list) { // if ingestion playbooks are present
-          angular.forEach(ingestionPlaybookPagedCollection.list, function (playbook) {
-            playbook.isActive = true;
-          });
+        ],
+        "page": 1,
+        "__selectFields": [
+        ]
+      };
+      $resource(API.QUERY + 'solutionpacks?$limit=30&$page=1').save(queryBody).$promise.then(function (response) {
+        if (response['hydra:member'] && response['hydra:member'].length > 0) {
+          $scope.exchangeUUID = response['hydra:member'][0].uuid;
         }
-        var apiResource = $resource(API.BASE, {}, {}, {
-          stripTrailingSlashes: false
-        });
-        // save ingestion playbooks
-        apiResource.save({
-          $relationships: true
-        }, ingestionPlaybookPagedCollection.list).$promise.then(function () {
-          // self.moveNext();
-          // self.params.form.scheduleSaving = false;
-        }, function (error) {
-          statusCodeService(error, true);
-        });
       });
     }
 
@@ -775,18 +508,19 @@
       $scope.toggleConnectorConfig = [];
       $scope.toggleParametersConfig = [];
       $scope.toggleScheduleConfig = [];
+      $scope.healthyConnectors = [];
       $scope.connectorHealthStatus = [];
       $scope.connectorParamsStatus = [];
       for (let index = 0; index < $scope.installedConnectors.length; index++) {
         $scope.toggleConnectorConfig[index] = true;
         $scope.toggleParametersConfig[index] = false;
         $scope.toggleScheduleConfig[index] = false;
-        $scope.isConnectorHealthy[index] = false;
+        $scope.healthyConnectors[index] = false;
         $scope.connectorHealthStatus[index] = false;
         $scope.connectorParamsStatus[index] = false;
       }
       loadActiveTab($state.params.tabIndex, $state.params.tab);
-      WizardHandler.wizard('timSolutionpackWizard').next();
+      WizardHandler.wizard('timSolutionpackConfigWizard').next();
     }
   }
 })();

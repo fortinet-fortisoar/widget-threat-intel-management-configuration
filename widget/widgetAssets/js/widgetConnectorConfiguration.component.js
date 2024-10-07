@@ -16,6 +16,7 @@
         this.CommonUtils = CommonUtils;
         this.DEFAULT_REPO_URL = DEFAULT_REPO_URL;
         this.$filter = $filter;
+        this.$rootScope = $rootScope;
         this.$window = $window;
         this.fileService = fileService;
         this.permissions = currentPermissionsService.getPermissions(['agents', 'security', 'connectors']);
@@ -261,6 +262,7 @@
           if (data.id) {//contains id means it is the return call for agent health check
             self.websocketService.subscribe(data.id, function (result) {
               if (result.status && (result.status === 'Available' || result.status === 'Disconnected' || result.status === 'Deactivated')) {
+                self.$rootScope.$broadcast('healthCheckDetails', { 'tabIndex': self.tabIndex, 'connectorInfo': self.connectorInfo });
                 var updateConfig = self._.find(self.connectorInfo.configuration, function (config) {
                   return config.config_id === result.config_id;
                 });
@@ -281,7 +283,13 @@
           } else {
             self.input.selectedConfiguration.status = data.status;
             self.input.selectedConfiguration._message = data.message;
+            self.connectorInfo.configuration.forEach(function(config){
+              if(config.config_id === data.config_id){
+                config.status = data.status;
+              }
+            });
             self.input.selectedConfiguration.lastKnownHealthTime = undefined;
+            self.$rootScope.$broadcast('healthCheckDetails', { 'tabIndex': self.tabIndex, config_id: data.config_id, 'connectorInfo': self.connectorInfo });
             //self.checkIngestionEnable();
           }
         }, function (error) {

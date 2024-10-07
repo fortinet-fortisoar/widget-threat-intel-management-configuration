@@ -79,7 +79,7 @@
             data-ng-class="{ 'has-error': scheduleForm['timezoneId'].$invalid && scheduleForm['timezoneId'].$touched }">
             <label for="timezone" class="control-label">Timezone: <span
                 data-uib-tooltip="Select the timezone that you want to export the report in. It uses UTC by default."
-                data-tooltip-append-to-body="true"><i class="icon icon-information"></i></span>
+                data-tooltip-append-to-body="true"><i class="icon icon-information"></i></span></label>
               <div class="btn-group cd-dropdown padding-top-sm" uib-dropdown is-open="fieldDropDown.isopen">
                 <button class="form-control input-sm" data-ng-disabled="disabled" uib-dropdown-toggle type="button"
                   data-toggle="dropdown">{{scheduleConfig.kwargs.timezone===undefined ||
