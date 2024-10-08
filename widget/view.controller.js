@@ -1,7 +1,6 @@
 /* Copyright start
-  Copyright (C) 2008 - 2023 Fortinet Inc.
-  All rights reserved.
-  FORTINET CONFIDENTIAL & FORTINET PROPRIETARY SOURCE CODE
+  MIT License
+  Copyright (c) 2024 Fortinet Inc
   Copyright end */
 'use strict';
 (function () {
@@ -9,9 +8,9 @@
     .module('cybersponse')
     .controller('threatIntelManagementConfiguration100Ctrl', threatIntelManagementConfiguration100Ctrl);
 
-  threatIntelManagementConfiguration100Ctrl.$inject = ['$scope', 'threatIntelManagementConfigurationService', 'widgetDataIngestionService', 'WizardHandler', '$controller', '$state', 'connectorService', 'currentPermissionsService', 'CommonUtils', 'API', '_', '$filter', '$http', 'dataIngestionService', 'PagedCollection', '$resource', 'FIXED_MODULE', 'Entity', 'playbookService', 'translationService', 'toaster', 'appModulesService', 'widgetBasePath', '$rootScope', '$timeout', 'ALL_RECORDS_SIZE'];
+  threatIntelManagementConfiguration100Ctrl.$inject = ['$scope', 'threatIntelManagementConfigurationService', 'widgetDataIngestionService', 'WizardHandler', '$controller', '$state', 'connectorService', 'currentPermissionsService', 'CommonUtils', 'API', '_', '$filter', '$http', '$resource', 'toaster', 'appModulesService', 'widgetBasePath', '$rootScope', '$timeout', 'ALL_RECORDS_SIZE'];
 
-  function threatIntelManagementConfiguration100Ctrl($scope, threatIntelManagementConfigurationService, widgetDataIngestionService, WizardHandler, $controller, $state, connectorService, currentPermissionsService, CommonUtils, API, _, $filter, $http, dataIngestionService, PagedCollection, $resource, FIXED_MODULE, Entity, playbookService, translationService, toaster, appModulesService, widgetBasePath, $rootScope, $timeout, ALL_RECORDS_SIZE) {
+  function threatIntelManagementConfiguration100Ctrl($scope, threatIntelManagementConfigurationService, widgetDataIngestionService, WizardHandler, $controller, $state, connectorService, currentPermissionsService, CommonUtils, API, _, $filter, $http, $resource, toaster, appModulesService, widgetBasePath, $rootScope, $timeout, ALL_RECORDS_SIZE) {
     $controller('BaseConnectorCtrl', {
       $scope: $scope
     });
@@ -340,7 +339,7 @@
         },
         "kwargs": {
           "exit_if_running": true,
-          "wf_iri": API.API_3_BASE + "API.WORKFLOWS/" + ingestionConnectorDetails.ingestionPlaybook.ingestPlaybook['@id'],
+          "wf_iri": API.API_3_BASE + "API.WORKFLOWS" + ingestionConnectorDetails.ingestionPlaybook.ingestPlaybook['@id'],
           "timezone": "UTC",
           "utcOffset": "UTC",
           "createUser": "/api/3/people/3451141c-bac6-467c-8d72-85e0fab569ce"
