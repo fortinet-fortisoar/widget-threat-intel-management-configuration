@@ -340,7 +340,7 @@
         },
         "kwargs": {
           "exit_if_running": true,
-          "wf_iri": API.API_3_BASE + "workflows/" + ingestionConnectorDetails.ingestionPlaybook.ingestPlaybook['@id'],
+          "wf_iri": API.API_3_BASE + "API.WORKFLOWS/" + ingestionConnectorDetails.ingestionPlaybook.ingestPlaybook['@id'],
           "timezone": "UTC",
           "utcOffset": "UTC",
           "createUser": "/api/3/people/3451141c-bac6-467c-8d72-85e0fab569ce"
