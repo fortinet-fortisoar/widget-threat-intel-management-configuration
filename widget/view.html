@@ -7,9 +7,8 @@
 <div class="modal-header">
     <h3 class="modal-title col-md-9">Threat Intel Management Configuration</h3>
 </div>
-<script src="{{widgetScript}}"></script>
 <wizard on-finish="close()" indicators-position="top"
-    class="cs-wizard ingestion-steps solutionpack-wizard-steps tim-config-steps" name="timSolutionpackWizard">
+    class="cs-wizard ingestion-steps solutionpack-wizard-steps tim-config-steps" name="timSolutionpackConfigWizard">
     <wz-step wz-title="Start" wz-order="1" class="ingestion-modal-padding wizard-first-step full-width">
         <div class="full-width wz-step-height padding-bottom-md solutionpack-wizard-modal-body">
             <div class="full-height overflow-auto">
@@ -38,13 +37,13 @@
                             </div>
                             <button type="button"
                                 class="btn btn-primary btn-sm margin-top-xlg text-transform-none font-size-14"
-                                data-ng-disabled="!isFortiGuardConectorInstalled"
+                                data-ng-disabled="!isFortiGuardConnectorInstalled"
                                 data-ng-click="moveToSelectConnector()" id="solutionpack-next-btn">
-                                <span data-ng-if="isFortiGuardConectorInstalled === false">Installing Fortinet
+                                <span data-ng-if="isFortiGuardConnectorInstalled === false">Installing Fortinet
                                     FortiGuard Connector...</span>
-                                <span data-ng-if="isFortiGuardConectorInstalled === true">Let's get started</span>
+                                <span data-ng-if="isFortiGuardConnectorInstalled === true">Let's get started</span>
                                 <i class="fa margin-left-sm"
-                                    data-ng-class="!isFortiGuardConectorInstalled ? 'fa-spin fa-spinner' : 'fa-chevron-right'"></i>
+                                    data-ng-class="!isFortiGuardConnectorInstalled ? 'fa-spin fa-spinner' : 'fa-chevron-right'"></i>
                             </button>
                         </div>
                     </div>
@@ -76,31 +75,31 @@
                                         the feeds.</span>
                                 </p>
                                 <div class="display-flex font-size-12">
-                                    <img src="{{fortiGuardConector.iconLarge}}" alt="" height="60px"
+                                    <img src="{{fortiGuardConnector.iconLarge}}" alt="" height="60px"
                                         style="border-radius: 4px;margin-right: 10px;">
                                     <table>
                                         <tr>
                                             <td style="color: #A3AAB7;">Name</td>
                                             <td>
-                                                <span>{{fortiGuardConector.label}} | </span>
-                                                <i data-ng-if="isFortiGuardConectorInstalled"
-                                                    class="font-size-14 margin-0 text-center margin-top-sm text-success text-success icon icon-approval margin-right-sm"></i>
-                                                <i data-ng-if="!isFortiGuardConectorInstalled"
-                                                    class="font-size-14 margin-0 text-center margin-top-sm margin-bottom-sm text-danger icon icon-failed margin-right-sm"></i>
-                                                <span> Installed</span>
+                                                <span>{{fortiGuardConnector.label}} | </span>
+                                                <i data-ng-if="isFortiGuardConnectorInstalled"
+                                                    class="font-size-14 margin-0 text-center margin-top-sm text-success text-success icon icon-check"></i>
+                                                <i data-ng-if="!isFortiGuardConnectorInstalled"
+                                                    class="font-size-14 margin-0 text-center margin-top-sm margin-bottom-sm text-danger icon icon-failed"></i>
+                                                <span>Installed</span>
                                             </td>
                                         </tr>
                                         <tr>
                                             <td style="color: #A3AAB7;">Version</td>
-                                            <td>{{fortiGuardConector.version}}</td>
+                                            <td>{{fortiGuardConnector.version}}</td>
                                         </tr>
                                         <tr>
                                             <td style="padding-right: 25px; color: #A3AAB7;">Published by </td>
-                                            <td>{{fortiGuardConector.publisher}}</td>
+                                            <td>{{fortiGuardConnector.publisher}}</td>
                                         </tr>
                                         <tr>
                                             <td style="color: #A3AAB7;">Certified </td>
-                                            <td>{{fortiGuardConector.certified ? 'Yes' : 'No'}}</td>
+                                            <td>{{fortiGuardConnector.certified ? 'Yes' : 'No'}}</td>
                                         </tr>
                                     </table>
                                 </div>
@@ -114,14 +113,15 @@
                                         to fetch feeds from.</span>
                                 </p>
                                 <input class="form-control margin-bottom-sm" type="text" placeholder="Search"
-                                    ng-model="searchQuery">
+                                    ng-model="searchQuery" />
                                 <div style="overflow: auto; height: calc(100vh - 625px);">
-                                    <div class="additional-feed-connector">
-                                        <uib-accordion close-others="true">
-                                            <div uib-accordion-group
-                                                ng-repeat="connector in feedConnectors | filter:searchQuery"
-                                                is-open="connector.toggleSelectFeeds" class="panel-default"
-                                                style="width: 100%;">
+                                    <div ng-repeat="connector in feedConnectors | filter:searchQuery"
+                                        class="additional-feed-connector">
+                                        <uib-accordion
+                                            data-ng-if="connector.label!=='Fortinet FortiGuard Threat Intelligence'"
+                                            close-others="true">
+                                            <div uib-accordion-group is-open="connector.toggleSelectFeeds"
+                                                class="panel-default" style="width: 100%;">
                                                 <uib-accordion-heading class="padding-md">
                                                     <div class="align-items-center display-flex">
                                                         <div
@@ -134,8 +134,8 @@
                                                                     data-ng-model="connector.selectConnector" />
                                                             </label>
                                                         </div>
-                                                        <div data-ng-class="{'queue-text-active-color': connector.toggleSelectFeeds
-                                                                }">
+                                                        <div
+                                                            data-ng-class="{'queue-text-active-color': connector.toggleSelectFeeds}">
                                                             <div class="font-size-14 margin-right-lg pull-left">
                                                                 <span class="queue-card-actions">&nbsp;<i
                                                                         class="fa {{ connector.toggleSelectFeeds ? 'fa-chevron-down' : 'fa-chevron-right'}}"></i></span>
@@ -148,8 +148,8 @@
                                                         <div
                                                             class="font-size-14 justify-content margin-left-auto margin-right-sm">
                                                             <i data-ng-if="connector.installed"
-                                                                class="text-success icon icon-check"><span>
-                                                                    Installed</span></i>
+                                                                class="text-success icon icon-check"></i>
+                                                            <span data-ng-if="connector.installed">Installed</span>
                                                         </div>
                                                     </div>
                                                 </uib-accordion-heading>
@@ -158,12 +158,6 @@
                                                     <img src="{{connector.iconLarge}}" alt="" height="60px"
                                                         style="border-radius: 4px;margin-right: 10px;">
                                                     <table>
-                                                        <tr>
-                                                            <td style="color: #A3AAB7;">Installed</td>
-                                                            <td class="text-capitalize">
-                                                                {{connector.installed}}
-                                                            </td>
-                                                        </tr>
                                                         <tr>
                                                             <td style="color: #A3AAB7;">Version</td>
                                                             <td>{{connector.version}}</td>
@@ -213,10 +207,8 @@
                             </div>
                             <p class="font-Size-13 muted"><span>On this page, you will find the installation status of
                                     the feed integration you selected on the previous page.</span></p>
-                            <h6 class="font-weight-normal margin-bottom-sm modal-title text-transform-none">
-                                Installation Progress</h6>
                             <p class="font-Size-13 muted">
-                                <span>Total Connectors {{getSelectedConnectorsCount()}}</span>
+                                <span>Total Connectors {{getSelectedConnectorsCount}}</span>
                             </p>
                             <div style="overflow: auto; height: calc(100vh - 432px);">
                                 <div ng-if="connector.selectConnector" ng-repeat="connector in feedConnectors"
@@ -229,14 +221,17 @@
                                     <div
                                         class="font-size-14 text-center margin-top-sm margin-bottom-sm justify-content margin-left-auto margin-right-sm">
                                         <i data-ng-if="!connector.installed && connector.selectConnector"
-                                            class="text-color-warning icon icon-installing-lodder-static"><span>
-                                                Installing...</span></i>
+                                            class="text-color-warning icon icon-installing-lodder-static"></i>
+                                        <span data-ng-if="!connector.installed && connector.selectConnector"
+                                            style="color: #D2D5DA;">Installing...</span>
                                         <i data-ng-if="connector.installed && connector.selectConnector"
-                                            class="text-success icon icon-check"><span>
-                                                Installed</span></i>
+                                            class="text-success icon icon-check"></i>
+                                        <span data-ng-if="connector.installed && connector.selectConnector"
+                                            style="color: #D2D5DA;">Installed</span>
                                         <i data-ng-if="!connector.installed && !connector.selectConnector"
-                                            class="text-danger icon icon-failed"><span>
-                                                Installed Failed</span></i>
+                                            class="text-danger icon icon-failed"></i>
+                                        <span data-ng-if="!connector.installed && !connector.selectConnector"
+                                            style="color: #D2D5DA;">Installed Failed</span>
                                     </div>
                                 </div>
                             </div>
@@ -247,7 +242,7 @@
         </div>
         <div class="ingestion-modal-footer">
             <button type="button" class="btn btn-sm btn-second-primary margin-top-lg margin-left-lg"
-                id="version-control-back-btn" data-ng-click="backToinstallConnector()"><i
+                id="version-control-back-btn" data-ng-click="backToSelectConnector()"><i
                     class="fa fa-chevron-left margin-right-sm"></i>Back</button>
             <button type="button" class="btn btn-primary pull-right btn-sm margin-top-lg margin-right-lg"
                 data-ng-disabled="!allConnectorsInstalled" data-ng-click="moveToConfigureConnector()"
@@ -256,6 +251,499 @@
                 <span data-ng-if="allConnectorsInstalled === true">Configure Connectors</span>
                 <i class="fa margin-left-sm"
                     data-ng-class="!allConnectorsInstalled ? 'fa-spin fa-spinner' : 'fa-chevron-right'"></i>
+            </button>
+        </div>
+    </wz-step>
+    <wz-step wz-title="Configure Feed Integrations" wz-order="4" class="ingestion-modal-padding full-width">
+        <form name="params.timConfigForm">
+            <div class="full-width wz-step-height padding-bottom-md solutionpack-wizard-modal-body">
+                <div class="overflow-auto">
+                    <div class="display-table fixed-table-layout full-height full-width">
+                        <div class="full-height display-table-cell vertical-align-middle">
+                            <div
+                                class="display-flex full-width overflow-auto solutionpack-wizard-modal-body wz-step-height">
+                                <uib-tabset active="params.activeTab" class="margin-top-11 width-100pt">
+                                    <uib-tab data-ng-repeat="timTool in installedConnectors track by $index"
+                                        index="$index" heading="{{ timTool.label }}"
+                                        data-ng-click="loadActiveTab($index)">
+                                        <div class="container full-width">
+                                            <div class="col-md-6 display-flex align-items-center">
+                                                <div class="full-width info-graphic-margin">
+                                                    <img class="img-responsive" src="{{configFeeds}}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 padding-left-0 prerequisites-section">
+                                                <div
+                                                    class="font-size-25 line-height-1 margin-bottom-lg margin-top-18 muted-80">
+                                                    Configure {{ timTool.label }} Integration</div>
+                                                <div class="form-group">
+                                                    <uib-accordion close-others="true">
+                                                        <div uib-accordion-group
+                                                            id="accordion-connector-config-{{ $index }}"
+                                                            class="panel-default" is-open="true" style="width: 100%;">
+                                                            <uib-accordion-heading class="padding-md">
+                                                                <div class="clearfix">
+                                                                    <div ng-click="toggleConnectorConfigSettings($index)"
+                                                                        data-ng-class="{'queue-text-active-color': toggleConnectorConfig[$index]}">
+                                                                        <div class="margin-right-lg pull-left"><span
+                                                                                class="queue-card-actions">&nbsp;<i
+                                                                                    class="fa {{ toggleConnectorConfig[$index] ? 'fa-chevron-down' : 'fa-chevron-right'}}"></i></span>
+                                                                        </div>
+                                                                        <div
+                                                                            class="pull-left queue-card-header-text margin-right-3">
+                                                                            Configuration Parameters</div>
+                                                                        <div class="clearfix"></div>
+                                                                    </div>
+                                                                </div>
+                                                            </uib-accordion-heading>
+                                                            <div ng-form="formHolder.connectorForm[$index]"
+                                                                name="formHolder.connectorForm[$index]">
+                                                                <div id="timConnectorWizard-{{$index}}"
+                                                                    class="margin-top-negative-20 margin-top-md padding-left-0 padding-right-0 tim-connector-config-width">
+                                                                    <div data-ng-if="!connectorProcessing">
+                                                                        <widget-connector-configuration-component
+                                                                            content-detail="timTool"
+                                                                            close-panel="handleClose()" owners="owners"
+                                                                            tab-index="$index"
+                                                                            ng-if="params.activeTab === $index"></widget-connector-configuration-component>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </uib-accordion>
+                                                </div>
+                                                <div class="form-group margin-top-negative-10">
+                                                    <uib-accordion>
+                                                        <div uib-accordion-group class="panel-default"
+                                                            id="accordion-params-config-{{ $index }}"
+                                                            is-disabled="!healthyConnectors[$index]"
+                                                            style="width: 100%;">
+                                                            <uib-accordion-heading class="padding-md">
+                                                                <div class="display-flex">
+                                                                    <div ng-click="toggleParametersSettings($index)"
+                                                                        data-ng-class="{'queue-text-active-color': toggleParametersConfig[$index]}">
+                                                                        <div class="margin-right-lg pull-left">
+                                                                            <span class="queue-card-actions">&nbsp;<i
+                                                                                    class="fa {{ toggleParametersConfig[$index] ? 'fa-chevron-down' : 'fa-chevron-right'}}"></i></span>
+                                                                        </div>
+                                                                        <div class=" pull-left queue-card-header-text
+                                                                                    margin-right-3">
+                                                                            Ingestion Parameters
+                                                                        </div>
+                                                                        <div class="clearfix"></div>
+                                                                    </div>
+                                                                </div>
+                                                            </uib-accordion-heading>
+                                                            <div class="margin-top-negative-20">
+                                                                <div
+                                                                    class="margin-top-negative-10 padding-left-lg padding-right-lg overflow-auto query-section">
+                                                                    <div ng-form="params.timConfigForm[healthyConnectorsParams[$index].ingestionPlaybook.ingestionConnector.name]"
+                                                                        name="params.timConfigForm[healthyConnectorsParams[$index].ingestionPlaybook.ingestionConnector.name]"
+                                                                        data-ng-if="healthyConnectorsParams[$index].ingestionPlaybook.fetchOperation">
+                                                                        <cs-connector-field-renderer
+                                                                            data-cs-form="params.timConfigForm[healthyConnectorsParams[$index].ingestionPlaybook.ingestionConnector.name]"
+                                                                            data-enable-jinja="false"
+                                                                            data-json-fields="healthyConnectorsParams[$index].ingestionPlaybook.fetchOperation"
+                                                                            data-params="healthyConnectorsParams[$index].ingestionPlaybook.fetchConfiguration"
+                                                                            data-connector-data="{'connector':healthyConnectorsParams[$index].ingestionPlaybook.ingestionConnector,'version':ingestionDetails.ingestionPlaybook.ingestionConnector.version, 'configuration':ingestionDetails.ingestionPlaybook.ingestionConnector.configuration}"
+                                                                            data-on-field-change="configFieldChanged"
+                                                                            data-show-subtitle="true">
+                                                                        </cs-connector-field-renderer>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="margin-15">
+                                                                    <button id="params-edit-save" type="button"
+                                                                        data-ng-if="dataIngestionParamsUpdating === false && allowPlaybookEdit"
+                                                                        class="btn btn-sm btn-primary"
+                                                                        data-ng-disabled="!params.timConfigForm[healthyConnectorsParams[$index].ingestionPlaybook.ingestionConnector.name].$dirty"
+                                                                        data-ng-click="saveParams(params.timConfigForm[healthyConnectorsParams[$index].ingestionPlaybook.ingestionConnector.name], $index)">
+                                                                        <i
+                                                                            class="icon icon-check margin-right-sm"></i>Save
+                                                                    </button>
+                                                                    <button
+                                                                        data-ng-if="dataIngestionParamsUpdating === true"
+                                                                        type="button" class="btn btn-sm btn-primary"
+                                                                        data-ng-disabled="dataIngestionParamsUpdating === true"
+                                                                        id="saving-edit-params">
+                                                                        <cs-spinner
+                                                                            class="pull-left margin-top-xsm state-wait button-spinner margin-right-sm"
+                                                                            data-show-background="true"
+                                                                            data-no-margin="margin-0"></cs-spinner>Saving
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </uib-accordion>
+                                                </div>
+                                                <div class="form-group margin-top-negative-10">
+                                                    <uib-accordion>
+                                                        <div uib-accordion-group class="panel-default"
+                                                            id="accordion-schedule-config-{{ $index }}"
+                                                            is-disabled="!healthyConnectors[$index]"
+                                                            style="width: 100%;">
+                                                            <uib-accordion-heading class="padding-md">
+                                                                <div class="display-flex">
+                                                                    <div ng-click="toggleScheduleConfigSettings($index)"
+                                                                        data-ng-class="{'queue-text-active-color': toggleScheduleConfig[$index]}">
+                                                                        <div class="margin-right-lg pull-left">
+                                                                            <span class="queue-card-actions">&nbsp;<i
+                                                                                    class="fa {{ toggleScheduleConfig[$index] ? 'fa-chevron-down' : 'fa-chevron-right'}}"></i></span>
+                                                                        </div>
+                                                                        <div
+                                                                            class="pull-left queue-card-header-text margin-right-3">
+                                                                            Ingestion Schedule Setting
+                                                                        </div>
+                                                                        <div class="clearfix"></div>
+                                                                    </div>
+                                                                </div>
+                                                            </uib-accordion-heading>
+                                                            <div class="padding-left-lg margin-top-negative-20">
+                                                                <div
+                                                                    class="padding-left-lg padding-right-lg overflow-auto query-section">
+                                                                    <div
+                                                                        data-ng-if="scheduleJsonData.ingestionPlaybook.ingestPlaybook">
+                                                                        <div class="margin-left-md"
+                                                                            data-tim-schedule-playbook
+                                                                            view-widget-vars="viewWidgetVars"
+                                                                            json-data="scheduleJsonData">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </uib-accordion>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </uib-tab>
+                                </uib-tabset>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ingestion-modal-footer">
+                <button type="button" class="btn btn-sm btn-second-primary margin-top-lg margin-left-lg"
+                    id="select-connector-back-btn" data-ng-click="backToinstallConnector()"><i
+                        class="fa fa-chevron-left margin-right-sm"></i>Back</button>
+                <button type="button" class="btn btn-primary pull-right btn-sm margin-top-lg margin-right-lg"
+                    data-ng-disabled="areFeedConnectorsConfigured" data-ng-click="moveToFeedRules()"
+                    id="feed-rule-next-btn-config">
+                    <span data-ng-if="areFeedConnectorsConfigured  === true">Validating Feed Integrations...</span>
+                    <span data-ng-if="areFeedConnectorsConfigured === false">Configure Feed Rules</span>
+                    <i class="fa margin-left-sm"
+                        data-ng-class="areFeedConnectorsConfigured ? 'fa-spin fa-spinner' : 'fa-chevron-right'"></i>
+                </button>
+            </div>
+        </form>
+    </wz-step>
+    <wz-step wz-title="Configure Feed Rules" wz-order="5" class="ingestion-modal-padding full-width">
+        <div class="full-width wz-step-height padding-bottom-md solutionpack-wizard-modal-body">
+            <div class="full-height overflow-auto">
+                <div class="display-table fixed-table-layout full-height full-width">
+                    <div class="full-height display-table-cell vertical-align-middle">
+                        <div class="col-md-6 display-flex" style="justify-content: center">
+                            <img class="img-responsive padding-top-70 step-image" src="{{feedRulesImg}}">
+                        </div>
+                        <div
+                            class="col-md-6 prerequisites-section padding-bottom-30 padding-left-0 padding-right-30 padding-top-30">
+                            <div class="font-size-30 muted-80 line-height-1 padding-bottom-md">Feed Rules</div>
+                            <p class="font-Size-13 muted"><span>On this page, you can configure the threat feed rules
+                                    based on which
+                                    you will manage the threat intelligence from different sources.</span></p>
+                            <div ng-form="feedToIndicatorLinkingForm" class="margin-top-negative-10">
+                                <uib-accordion data-ng-disabled="!feedRules.feedToIndicatorLinking.enabled"
+                                    close-others="true">
+                                    <div uib-accordion-group is-open="feedRules.feedToIndicatorLinking.open"
+                                        class="panel-default" id="accordion-feed-to-indicator-linking">
+                                        <uib-accordion-heading class="padding-md">
+                                            <div data-ng-click="toggleFeedRules(feedRules.feedToIndicatorLinking, $event)"
+                                                data-ng-class="{'queue-text-active-color': feedRules.feedToIndicatorLinking.open}">
+                                                <div class="margin-right-lg pull-left">
+                                                    <span class="queue-card-actions">&nbsp;<i
+                                                            class="fa {{ feedRules.feedToIndicatorLinking.open===true ? 'fa-chevron-down' : 'fa-chevron-right'}}"></i></span>
+                                                </div>
+                                                <div class=" pull-left queue-card-header-text margin-right-3">Feed To
+                                                    Indicator Linking</div>
+                                                <div class="pull-right margin-right-md">
+                                                    <label
+                                                        class="margin-0 switch switch-pill switch-label switch-success">
+                                                        <input type="checkbox" class="switch-input"
+                                                            id="feed-to-indicator-linking-switch-slider"
+                                                            name="feed-to-indicator-linking-switch-slider"
+                                                            data-ng-model="feedRules.feedToIndicatorLinking.enabled" />
+                                                        <span class="switch-slider" data-checked="Enabled"
+                                                            data-unchecked="Disabled"></span>
+                                                    </label>
+                                                </div>
+                                                <div class="clearfix"></div>
+                                            </div>
+                                        </uib-accordion-heading>
+                                        <p class="font-Size-13 muted margin-top-negative-20"><span>This rule will
+                                                enhance the reputation of indicators for which a matching feed is found.
+                                                The reputation will be automatically updated to reflect the feed's
+                                                reputation, provided that the feed confidence meets or exceeds the
+                                                specified threshold.</span></p>
+                                        <div class=" form-group margin-top-negative-10 padding-left-lg padding-right-lg overflow-auto query-section"
+                                            data-ng-class="{ 'has-error':
+                                                feedToIndicatorLinkingForm.feedConfidenceThreshold.$invalid &&
+                                                feedToIndicatorLinkingForm.feedConfidenceThreshold.$touched }">
+                                            <label for="feedConfidenceThreshold" class="control-label">Select Feed
+                                                Confidence
+                                                Threshold<span class="text-danger"></span>
+                                            </label>
+                                            <input id="feedConfidenceThreshold" style="width: 300px;"
+                                                name="feedConfidenceThreshold" type="number" data-ng-min="0" min="0"
+                                                step="1" data-ng-max="100" max="100" class="form-control"
+                                                maxlength="100"
+                                                data-ng-disabled="!feedRules.feedToIndicatorLinking.enabled"
+                                                data-ng-model="feedRules.feedToIndicatorLinking.feedConfidenceThreshold"
+                                                required />
+                                            <div data-cs-messages="feedToIndicatorLinkingForm.feedConfidenceThreshold"
+                                                data-field="{'validation': {'maxlength': 100, 'minlength': 0 } }">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </uib-accordion>
+                            </div>
+                            <div ng-form="highConfidenceThreatFeedsForm" class="margin-top-negative-10">
+                                <uib-accordion data-ng-disabled="!feedRules.highConfidenceThreatFeeds.enabled"
+                                    close-others="true">
+                                    <div uib-accordion-group is-open="feedRules.highConfidenceThreatFeeds.open"
+                                        class="panel-default" id="accordion-high-confidence-threat-feeds">
+                                        <uib-accordion-heading class="padding-md">
+                                            <div data-ng-click="toggleFeedRules(feedRules.highConfidenceThreatFeeds, $event)"
+                                                data-ng-class="{'queue-text-active-color': feedRules.highConfidenceThreatFeeds.open}">
+                                                <div class="margin-right-lg pull-left">
+                                                    <span class="queue-card-actions">&nbsp;<i
+                                                            class="fa {{ feedRules.highConfidenceThreatFeeds.open===true ? 'fa-chevron-down' : 'fa-chevron-right'}}"></i></span>
+                                                </div>
+                                                <div class=" pull-left queue-card-header-text margin-right-3">High
+                                                    Confidence Threat Feed Block</div>
+                                                <div class="pull-right margin-right-md">
+                                                    <label
+                                                        class="margin-0 switch switch-pill switch-label switch-success">
+                                                        <input type="checkbox" class="switch-input"
+                                                            id="high-confidence-threat-feeds-switch-slider"
+                                                            name="high-confidence-threat-feeds-switch-slider"
+                                                            data-ng-model="feedRules.highConfidenceThreatFeeds.enabled" />
+                                                        <span class="switch-slider" data-checked="Enabled"
+                                                            data-unchecked="Disabled"></span>
+                                                    </label>
+                                                </div>
+                                                <div class="clearfix"></div>
+                                            </div>
+                                        </uib-accordion-heading>
+                                        <p class="font-Size-13 muted margin-top-negative-20"><span>This rule will Block
+                                                Enriched Malicious Feeds with confidence greater than specified
+                                                threshold.</span></p>
+                                        <div class=" form-group margin-top-negative-10 padding-left-lg padding-right-lg overflow-auto query-section"
+                                            data-ng-class="{ 'has-error':
+                                                highConfidenceThreatFeedsForm.feedConfidenceThreshold.$invalid &&
+                                                highConfidenceThreatFeedsForm.feedConfidenceThreshold.$touched }">
+                                            <label for="feedConfidenceThreshold" class="control-label">Select Feed
+                                                Confidence
+                                                Threshold<span class="text-danger"></span>
+                                            </label>
+                                            <input id="feedConfidenceThreshold" style="width: 300px;"
+                                                name="feedConfidenceThreshold" type="number" data-ng-min="0" min="0"
+                                                step="1" data-ng-max="100" max="100" class="form-control"
+                                                maxlength="100"
+                                                data-ng-disabled="!feedRules.highConfidenceThreatFeeds.enabled"
+                                                data-ng-model="feedRules.highConfidenceThreatFeeds.feedConfidenceThreshold"
+                                                required />
+                                            <div data-cs-messages="highConfidenceThreatFeedsForm.feedConfidenceThreshold"
+                                                data-field="{'validation': {'maxlength': 100, 'minlength': 0 } }">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </uib-accordion>
+                            </div>
+                            <div ng-form="unstructuredFeedsSupportForm" class="margin-top-negative-10">
+                                <uib-accordion data-ng-disabled="!feedRules.unstructuredFeedsSupport.enabled"
+                                    close-others="true">
+                                    <div uib-accordion-group is-open="feedRules.unstructuredFeedsSupport.open"
+                                        class="panel-default" id="accordion-high-confidence-threat-feeds">
+                                        <uib-accordion-heading class="padding-md">
+                                            <div data-ng-click="toggleFeedRules(feedRules.unstructuredFeedsSupport, $event)"
+                                                data-ng-class="{'queue-text-active-color': feedRules.unstructuredFeedsSupport.open}">
+                                                <div class="margin-right-lg pull-left">
+                                                    <span class="queue-card-actions">&nbsp;<i
+                                                            class="fa {{ feedRules.unstructuredFeedsSupport.open===true ? 'fa-chevron-down' : 'fa-chevron-right'}}"></i></span>
+                                                </div>
+                                                <div class=" pull-left queue-card-header-text margin-right-3">
+                                                    Unstructured Feeds Support</div>
+                                                <div class="pull-right margin-right-md">
+                                                    <label
+                                                        class="margin-0 switch switch-pill switch-label switch-success">
+                                                        <input type="checkbox" class="switch-input"
+                                                            id="high-confidence-threat-feeds-switch-slider"
+                                                            name="high-confidence-threat-feeds-switch-slider"
+                                                            data-ng-model="feedRules.unstructuredFeedsSupport.enabled" />
+                                                        <span class="switch-slider" data-checked="Enabled"
+                                                            data-unchecked="Disabled"></span>
+                                                    </label>
+                                                </div>
+                                                <div class="clearfix"></div>
+                                            </div>
+                                        </uib-accordion-heading>
+                                        <p class="font-Size-13 muted margin-top-negative-20 section-form"><span>This
+                                                rule will help
+                                                to ingest the unstructured feed data from email or file(csv or
+                                                text).</span></p>
+                                        <div
+                                            class=" form-group margin-top-negative-10 padding-left-lg padding-right-lg overflow-auto query-section">
+                                            <div class="checkbox-inline section-form" style="width: 660px;">
+                                                <label for="ingestFeedsFromFile" class="control-label">
+                                                    <input id="ingestFeedsFromFile" type="checkbox"
+                                                        name="ingestFeedsFromFile" ng-checked="true"
+                                                        data-ng-model="feedRules.unstructuredFeedsSupport.ingestFeedsFromFile"
+                                                        data-ng-disabled="!feedRules.unstructuredFeedsSupport.enabled" />
+                                                    <span class="display-inline-block margin-top-1">Ingest Unstructured
+                                                        Feeds from Files</span>
+                                                </label>
+                                                <span
+                                                    data-uib-tooltip="By enabling this option, users can upload unstructured feeds in CSV or TXT format into the threat feed module."
+                                                    data-tooltip-append-to-body="true"><i
+                                                        class="margin-left-sm icon icon-information font-Size-13">
+                                                    </i></span>
+                                            </div><br />
+                                            <div class="checkbox-inline section-form" style="width: 660px;">
+                                                <label for="ingestFeedsFromEmail" class="control-label">
+                                                    <input id="ingestFeedsFromEmail" type="checkbox"
+                                                        name="ingestFeedsFromEmail"
+                                                        data-ng-model="feedRules.unstructuredFeedsSupport.ingestFeedsFromEmail"
+                                                        data-ng-disabled="!feedRules.unstructuredFeedsSupport.enabled" />
+                                                    <span class="display-inline-block margin-top-1">Ingest Unstructured
+                                                        Feeds from Email</span>
+                                                </label>
+                                                <span
+                                                    data-uib-tooltip="By enabling this option, users can email unstructured feeds in CSV or TXT format for ingestion into the threat feed module."
+                                                    data-tooltip-append-to-body="true"><i
+                                                        class="margin-left-sm icon icon-information font-Size-13">
+                                                    </i></span><br>
+                                                <small class="muted italic">
+                                                    Note: To configure the email ingestion make sure to configure the <a
+                                                        title="Exchange"
+                                                        href="/content-hub/my-content/?contentType=connector&uuid={{exchangeUUID}}"
+                                                        target="_blank" rel="noopener">Exchange</a> connector.
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </uib-accordion>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="ingestion-modal-footer">
+            <button type="button" class="btn btn-sm btn-second-primary margin-top-lg margin-left-lg"
+                id="config-feed-back-btn" data-ng-click="backToConfigConnector()"><i
+                    class="fa fa-chevron-left margin-right-sm"></i>Back</button>
+            <button type="button" class="btn btn-primary pull-right btn-sm margin-top-lg margin-right-lg"
+                data-ng-click="moveToFinish()" id="finish-next-btn">Next<i
+                    class="fa fa-chevron-right margin-left-sm"></i>
+            </button>
+        </div>
+    </wz-step>
+    <wz-step wz-title="Finish" wz-order="6" class="ingestion-modal-padding wizard-first-step">
+        <div class="full-width wz-step-height padding-bottom-md solutionpack-wizard-modal-body">
+            <div class="full-height overflow-auto">
+                <div class="display-table fixed-table-layout full-height full-width">
+                    <div class="full-height display-table-cell vertical-align-middle">
+                        <div class="col-md-6 display-flex" style="justify-content: center">
+                            <img class="img-responsive" src="{{finishInfoGraphics}}">
+                        </div>
+                        <div class="col-md-6 prerequisites-section padding-bottom-25 padding-left-0">
+                            <div class="font-size-30 muted-80 line-height-1">You are all set!</div><br />
+                            <div
+                                class="solid-border element-secondary-bgcolor padding-20 margin-top-md padding-top-md padding-bottom-md">
+                                <div class="data-ingestion-summary padding-top-lg">
+                                    <h6 class="font-weight-normal margin-bottom-sm modal-title text-transform-none">
+                                        Quick Summary</h6>
+                                    <p><i class="completed icon icon-approval margin-right-md font-size-16"></i><span
+                                            class="bold muted">Selected threat feed integration:
+                                            {{displayFeedIntegrations}}</span></p>
+                                    <p><i class="completed icon icon-approval margin-right-md font-size-16"></i><span
+                                            class="bold muted">Threat feed parameters set for
+                                            {{displayFeedIntegrations}} </span></p>
+                                    <p><i class="completed icon icon-approval margin-right-md font-size-16"></i><span
+                                            class="bold muted">Threat feed ingestion schedule is set to Every hour
+                                        </span>
+                                    </p>
+                                    <p><i class="completed icon icon-approval margin-right-md font-size-16"></i><span
+                                            class="bold muted"
+                                            data-ng-if="feedRules.feedToIndicatorLinking.enabled">Enabled the "Feed to
+                                            Indicator Linking" feed rule with a
+                                            confidence threshold of
+                                            {{feedRules.feedToIndicatorLinking.feedConfidenceThreshold}}.</span><span
+                                            class="bold muted"
+                                            data-ng-if="!feedRules.feedToIndicatorLinking.enabled">Disabled the "Feed to
+                                            Indicator Linking" feed rule</span></p>
+                                    <p><i class="completed icon icon-approval margin-right-md font-size-16"></i><span
+                                            class="bold muted"
+                                            data-ng-if="feedRules.highConfidenceThreatFeeds.enabled">Enabled the "High
+                                            Confidence Threat Feed Block" feed rule with a
+                                            confidence threshold of
+                                            {{feedRules.highConfidenceThreatFeeds.feedConfidenceThreshold}}.</span><span
+                                            class="bold muted"
+                                            data-ng-if="!feedRules.highConfidenceThreatFeeds.enabled">Disabled the "High
+                                            Confidence Threat Feed Block" feed rule </span></p>
+                                    <p><i class="completed icon icon-approval margin-right-md font-size-16"
+                                            data-ng-if="feedRules.unstructuredFeedsSupport.enabled && feedRules.unstructuredFeedsSupport.ingestFeedsFromFile"></i>
+                                        <span class="bold muted"
+                                            data-ng-if="feedRules.unstructuredFeedsSupport.enabled && feedRules.unstructuredFeedsSupport.ingestFeedsFromFile">Enabled
+                                            the "Unstructured Feeds Support" feed rule
+                                            with "Ingest Unstructured Feeds from Files"<br /><br /></span>
+                                        <i class="completed icon icon-approval margin-right-md font-size-16"
+                                            data-ng-if="feedRules.unstructuredFeedsSupport.enabled && !feedRules.unstructuredFeedsSupport.ingestFeedsFromFile"></i>
+                                        <span class="bold muted"
+                                            data-ng-if="feedRules.unstructuredFeedsSupport.enabled && !feedRules.unstructuredFeedsSupport.ingestFeedsFromFile">Disabled
+                                            the "Unstructured Feeds Support" feed rule
+                                            without "Ingest Unstructured Feeds from Files"<br /><br /></span>
+                                        <i class="completed icon icon-approval margin-right-md font-size-16"
+                                            data-ng-if="feedRules.unstructuredFeedsSupport.enabled && feedRules.unstructuredFeedsSupport.ingestFeedsFromEmail"></i>
+                                        <span class="bold muted"
+                                            data-ng-if="feedRules.unstructuredFeedsSupport.enabled && feedRules.unstructuredFeedsSupport.ingestFeedsFromEmail">Enabled
+                                            the "Unstructured Feeds Support" feed rule
+                                            with "Ingest Unstructured Feeds from Email"<br /><br /></span>
+                                        <i class="completed icon icon-approval margin-right-md font-size-16"
+                                            data-ng-if="feedRules.unstructuredFeedsSupport.enabled && !feedRules.unstructuredFeedsSupport.ingestFeedsFromEmail"></i>
+                                        <span class="bold muted"
+                                            data-ng-if="feedRules.unstructuredFeedsSupport.enabled && !feedRules.unstructuredFeedsSupport.ingestFeedsFromEmail">Disabled
+                                            the "Unstructured Feeds Support" feed rule
+                                            without "Ingest Unstructured Feeds from Email"<br /><br /></span>
+                                        <i class="completed icon icon-approval margin-right-md font-size-16"
+                                            data-ng-if="!feedRules.unstructuredFeedsSupport.enabled"></i> <span
+                                            class="bold muted"
+                                            data-ng-if="!feedRules.unstructuredFeedsSupport.enabled">Disabled
+                                            the "Unstructured Feeds Support" feed rule</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div
+                                class="solid-border element-secondary-bgcolor padding-20 margin-top-md padding-top-md padding-bottom-md">
+                                <p class="font-size-13 margin-bottom-0 muted">Configurations associated with
+                                    prerequisites are now complete.</p>
+                                <p class="font-size-13 margin-bottom-0 muted">Navigate to the <a
+                                        data-ng-click="close()">Threat Intel Management</a> in the navigation menu to
+                                    start using this solution.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="ingestion-modal-footer">
+            <button type="button" class="btn btn-sm btn-second-primary margin-top-lg margin-left-lg"
+                id="solutionpack-configure-back-btn" data-ng-click="backToFeedRules()"><i
+                    class="fa fa-chevron-left margin-right-sm"></i>Back</button>
+            <button type="button" class="btn btn-primary pull-right btn-sm margin-top-lg margin-right-lg"
+                data-ng-click="close()" id="solutionpack-configure-finish-btn">Finish<i
+                    class="fa fa-chevron-right margin-left-sm"></i>
             </button>
         </div>
     </wz-step>

@@ -8,16 +8,17 @@
     "metadata": {
         "description": "This wizard is designed to assist you in setting up Threat Intel Management within your FortiSOAR environment. It will guide you through selecting and configuring feed integrations, scheduling feed ingestion, adjusting Threat Intel settings, and configuring Solution Packs to enhance your threat intelligence infrastructure.",
         "pages": [],
-        "certified": "No",
-        "publisher": null,
+        "certified": "Yes",
+        "publisher": "Fortinet",
         "compatibility": [
             "7.6.0"
         ],
+        "snapshots": [],
         "standalone": true,
+        "help_online": "https:\/\/github.com\/fortinet-fortisoar\/widget-threat-intel-management-configuration\/blob\/release\/1.0.0\/README.md",
         "windowClass": "Full Width",
         "category": [
             "ThreatIntel"
         ]
-    },
-    "development": false
+    }
 }
