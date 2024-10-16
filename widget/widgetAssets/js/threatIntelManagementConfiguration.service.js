@@ -19,8 +19,7 @@
             configFortiGuardConnector: configFortiGuardConnector,
             installConnector: installConnector,
             getConnectorInstallationProgress: getConnectorInstallationProgress,
-            ingestionRecordTags: ingestionRecordTags,
-            //activateSchedule: activateSchedule
+            ingestionRecordTags: ingestionRecordTags
         };
 
         function installConnector(connector) {
@@ -108,23 +107,6 @@
             });
             return defer.promise;
         }
-
-        // function activateSchedule(scheduledID) {
-        //     var deferred = $q.defer();
-        //     $resource(API.WORKFLOW + 'api/scheduled/'+ scheduledID + '/?format=json', null, {
-        //       'update': {
-        //         method: 'PUT'
-        //       }
-        //     }).update({
-        //       'enabled': true
-        //     }).$promise.then(function(userDetails) {
-        //       deferred.resolve(userDetails);
-        //     }, function(failed) {
-        //       $log.error('Could not activate schedule: ', failed);
-        //       deferred.reject(failed);
-        //     });
-        //     return deferred.promise;
-        //   }
 
         function ingestionRecordTags() {
             return {
