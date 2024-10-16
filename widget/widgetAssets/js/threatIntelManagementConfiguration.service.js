@@ -8,9 +8,9 @@
         .module('cybersponse')
         .factory('threatIntelManagementConfigurationService', threatIntelManagementConfigurationService);
 
-    threatIntelManagementConfigurationService.$inject = ['marketplaceService', '$q', '$http', 'API', 'ALL_RECORDS_SIZE', '$filter', 'Modules', 'CommonUtils', '$window', '$resource'];
+    threatIntelManagementConfigurationService.$inject = ['marketplaceService', '$q', '$http', 'API', 'ALL_RECORDS_SIZE', '$filter', 'Modules', 'CommonUtils', '$window'];
 
-    function threatIntelManagementConfigurationService(marketplaceService, $q, $http, API, ALL_RECORDS_SIZE, $filter, Modules, CommonUtils, $window, $resource) {
+    function threatIntelManagementConfigurationService(marketplaceService, $q, $http, API, ALL_RECORDS_SIZE, $filter, Modules, CommonUtils, $window) {
 
         const WAIT_IN_SEC = 5000;
 
