@@ -8,9 +8,9 @@
     .module('cybersponse')
     .controller('threatIntelManagementConfiguration100Ctrl', threatIntelManagementConfiguration100Ctrl);
 
-  threatIntelManagementConfiguration100Ctrl.$inject = ['$scope', 'threatIntelManagementConfigurationService', 'widgetDataIngestionService', 'WizardHandler', '$controller', '$state', 'connectorService', 'currentPermissionsService', 'CommonUtils', 'API', '_', '$filter', '$http', '$resource', 'toaster', 'appModulesService', 'widgetBasePath', '$rootScope', '$timeout', 'ALL_RECORDS_SIZE'];
+  threatIntelManagementConfiguration100Ctrl.$inject = ['$scope', 'PagedCollection', 'Query', 'SchedulesService', 'threatIntelManagementConfigurationService', 'widgetDataIngestionService', 'WizardHandler', '$controller', '$state', 'connectorService', 'currentPermissionsService', 'CommonUtils', 'API', '_', '$filter', '$http', '$resource', 'toaster', 'appModulesService', 'widgetBasePath', '$rootScope', '$timeout', 'ALL_RECORDS_SIZE', '$q', 'Modules'];
 
-  function threatIntelManagementConfiguration100Ctrl($scope, threatIntelManagementConfigurationService, widgetDataIngestionService, WizardHandler, $controller, $state, connectorService, currentPermissionsService, CommonUtils, API, _, $filter, $http, $resource, toaster, appModulesService, widgetBasePath, $rootScope, $timeout, ALL_RECORDS_SIZE) {
+  function threatIntelManagementConfiguration100Ctrl($scope, PagedCollection, Query, SchedulesService, threatIntelManagementConfigurationService, widgetDataIngestionService, WizardHandler, $controller, $state, connectorService, currentPermissionsService, CommonUtils, API, _, $filter, $http, $resource, toaster, appModulesService, widgetBasePath, $rootScope, $timeout, ALL_RECORDS_SIZE, $q, Modules) {
     $controller('BaseConnectorCtrl', {
       $scope: $scope
     });
@@ -26,15 +26,14 @@
     $scope.moveToFinish = moveToFinish;
     $scope.installConnector = installConnector;
     $scope.close = close;
+    $scope.connectorInstalledOnAgents = [];
     $scope.toggleSelectFeedsSettings = toggleSelectFeedsSettings;
-    $scope.toggleConnectorConfigSettings = toggleConnectorConfigSettings;
     $scope.dataIngestionParamsUpdating = false;
     $scope.areFeedConnectorsConfigured = false;
     $scope.toggleConnectorConfig = [];
     $scope.toggleParametersConfig = [];
-    $scope.toggleScheduleConfig = [];
-    $scope.toggleParametersSettings = toggleParametersSettings;
-    $scope.toggleScheduleConfigSettings = toggleScheduleConfigSettings;
+    $scope.dataIngestCollectionUUIDs = [];
+    $scope.saveSchedules = [];
     $scope.toggleFeedRules = toggleFeedRules;
     $scope.saveParams = saveParams;
     $scope.allConnectorsInstalled = false;
@@ -55,24 +54,25 @@
     $scope.feedRules = {
       highConfidenceThreatFeeds: {
         enabled: true,
-        open: true,
         name: 'High Confidence Threat Feed Block',
-        feedConfidenceThreshold: 70
+        feedConfidenceThreshold: 70,
+        feedTools: []
       },
       feedToIndicatorLinking: {
         enabled: true,
-        open: true,
         name: 'Feed To Indicator Linking',
         feedConfidenceThreshold: 70
       },
       unstructuredFeedsSupport: {
         enabled: true,
-        open: true,
         name: 'Unstructured Feeds Support',
         ingestFeedsFromFile: true,
         ingestFeedsFromEmail: false
       }
     };
+    $scope.toggleFeedToIndicatorLinking = { open: true };
+    $scope.toggleHighConfidenceThreatFeeds = { open: false };
+    $scope.toggleUnstructuredFeedsSupport = { open: false };
     $scope.connectorFetchIndex = {};
     $scope.connectorConfigIndex = {};
     $scope.isLightTheme = $rootScope.theme.id === 'light';
@@ -85,17 +85,42 @@
     $scope.finishInfoGraphics = widgetBasePath + 'images/finish.png';
     $scope.widgetCSS = widgetBasePath + 'widgetAssets/css/wizard-style.css';
     const fortiGuardConnectorName = 'Fortinet FortiGuard Threat Intelligence';
-
+    $scope.toggleConnectorConfigSettings = { open: true };
+    $scope.toggleParametersSettings = { open: false };
+    $scope.toggleScheduleConfigSettings = { open: false };
     init();
 
     function init() {
+      var pagedCollection = new PagedCollection('keys');
+      var query = {
+        logic: 'AND',
+        limit: 1,
+        filters: [{
+          field: 'key',
+          operator: 'eq',
+          value: 'threat-intel-management-feed-rules-config'
+        }
+        ],
+        __selectFields: ["jSONValue"]
+      };
+      pagedCollection.query = new Query(query);
+      pagedCollection.load().then(function () {
+        if (pagedCollection.data['hydra:member'].length > 0 > 0) {
+          $scope.feedRules = pagedCollection.data['hydra:member'][0].jSONValue;
+        }
+      });
       $scope.isFortiGuardConnectorInstalled = true;
-
       appModulesService.load(true).then(function (modules) {
         modules = $filter('playbookModules')(modules);
         $scope.modules = currentPermissionsService.availablePermissions(modules, 'create');
       });
       $scope.allowPlaybookEdit = currentPermissionsService.availablePermission('workflows', 'create') || currentPermissionsService.availablePermission('workflows', 'update');
+      Modules.get({
+        module: 'teams',
+        $limit: self.ALL_RECORDS_SIZE,
+      }).$promise.then(function (result) {
+        $scope.owners = result['hydra:member'];
+      });
     }
 
     function close() {
@@ -107,24 +132,11 @@
     function toggleFeedRules(feedRule, $event) {
       if ($event && $event.target.className === 'switch-slider') {
         feedRule.enabled = !feedRule.enabled;
-        feedRule.open = !feedRule.open;
       }
-    }
-
-    function toggleConnectorConfigSettings(index) {
-      $scope.toggleConnectorConfig[index] = !$scope.toggleConnectorConfig[index];
-    }
-
-    function toggleScheduleConfigSettings(index) {
-      $scope.toggleScheduleConfig[index] = !$scope.toggleScheduleConfig[index];
     }
 
     function toggleSelectFeedsSettings(event) {
       event.stopPropagation();
-    }
-
-    function toggleParametersSettings(index) {
-      $scope.toggleParametersConfig[index] = !$scope.toggleParametersConfig[index];
     }
 
     function installConnector() {
@@ -159,6 +171,9 @@
     }
 
     function loadActiveTab(tabIndex) {
+      $scope.toggleConnectorConfigSettings = { open: true };
+      $scope.toggleParametersSettings = { open: false };
+      $scope.toggleScheduleConfigSettings = { open: false };
       $scope.scheduleJsonData = undefined;
       $scope.healthyConnectors[tabIndex] = false;
       if (CommonUtils.isUndefined(tabIndex)) {
@@ -199,26 +214,29 @@
       $scope.scheduleID = data.scheduleId;
     });
 
+    $scope.$on('configurationChanged', function (event, data) {
+      $scope.healthyConnectors[data.tabIndex] = false;
+    });
+
     $scope.$on('healthCheckDetails', function (event, connectorDetails) {
       var connector = angular.copy(connectorDetails);
       const connectorConfig = _.find(connector.connectorInfo.configuration, { config_id: connector.config_id });
       if (connectorConfig.status === "Available") {
-        _.assign(connector.connectorInfo, { "configuration": connectorConfig });
-        _.assign(connector.connectorInfo, { "playbook_collections": connector.connectorInfo.playbook_collections[0] });
-        _.assign(connector.connectorInfo, { "uuid": $scope.installedConnectors[connector.tabIndex].uuid });
-        _processDataIngestion(connector.tabIndex, connector.connectorInfo);
+        if (!$scope.healthyConnectors[connector.tabIndex]) {
+          $scope.installedConnectors[connector.tabIndex].health = true;
+          $scope.installedConnectors[connector.tabIndex].checked = true;
+          _.assign(connector.connectorInfo, { "configuration": connectorConfig });
+          _.assign(connector.connectorInfo, { "playbook_collections": connector.connectorInfo.playbook_collections[0] });
+          _.assign(connector.connectorInfo, { "uuid": $scope.installedConnectors[connector.tabIndex].uuid });
+          _processDataIngestion(connector.tabIndex, connector.connectorInfo);
+        }
       }
       else {
-        var paramsConfig = document.getElementById('accordion-params-config-' + connector.tabIndex);
-        if (_.includes(paramsConfig.childNodes[2].classList, "in")) {
-          paramsConfig.childNodes[2].classList.replace('in', null);
-          toggleParametersSettings(connector.tabIndex);
-        }
-        var schedulrConfig = document.getElementById('accordion-schedule-config-' + connector.tabIndex);
-        if (_.includes(schedulrConfig.childNodes[2].classList, "in")) {
-          schedulrConfig.childNodes[2].classList.replace('in', null);
-          toggleScheduleConfigSettings(connector.tabIndex);
-        }
+        $scope.installedConnectors[connector.tabIndex].health = false;
+        $scope.installedConnectors[connector.tabIndex].checked = false;
+        $scope.toggleConnectorConfigSettings = { open: true };
+        $scope.toggleParametersSettings = { open: false };
+        $scope.toggleScheduleConfigSettings = { open: false };
         $scope.healthyConnectors[connector.tabIndex] = false;
       }
     });
@@ -237,7 +255,11 @@
     }
 
     function moveToFinish() {
-      $scope.displayFeedIntegrations = _.map($scope.installedConnectors, "label").join(', ');
+       let feedIntegrationNames = _.map(
+        _.filter($scope.installedConnectors, { checked: true }),
+        'label'
+      );
+      $scope.displayFeedIntegrations = feedIntegrationNames.join(', ');
       var queryPayload =
       {
         "request": $scope.feedRules
@@ -313,12 +335,13 @@
       return new Promise((resolve, reject) => {
         widgetDataIngestionService.cloneIngestionPlaybookCollection($scope, healthyConnector).then(function () {
           widgetDataIngestionService.prepareFetchSampleConfig($scope, tabIndex, healthyConnector).then(function () {
-            widgetDataIngestionService.activateIngestionPlaybooks($scope.ingestCollectionUUID).then(function () {
-              _createDefaultSchedule($scope.healthyConnectorsParams[tabIndex]);
-              $scope.scheduleJsonData = angular.copy($scope.healthyConnectorsParams[tabIndex]);
-              $scope.healthyConnectors[tabIndex] = true;
-              resolve();
+            $scope.dataIngestCollectionUUIDs[tabIndex] = $scope.ingestCollectionUUID
+            _createDefaultSchedule(tabIndex, $scope.healthyConnectorsParams[tabIndex]);
+            $scope.healthyConnectors[tabIndex] = true;
+            toaster.success({
+              body: 'Data Ingestion successfully configured for the integration ' + healthyConnector.label
             });
+            resolve();
           });
         }).catch(error => {
           console.error('Error processing healthyConnectors:', error);
@@ -327,7 +350,7 @@
       });
     }
 
-    function _createDefaultSchedule(ingestionConnectorDetails) {
+    function _createDefaultSchedule(tabIndex, ingestionConnectorDetails) {
       var queryBody = {
         name: "Ingestion_" + ingestionConnectorDetails.ingestionPlaybook.ingestionConnector.name + "_" + (ingestionConnectorDetails.ingestionPlaybook.ingestionConnector.configuration.name).replace(/\s+/g, '-') + "_" + ingestionConnectorDetails.ingestionPlaybook.ingestionConnector.configuration.config_id,
         "crontab": {
@@ -344,18 +367,20 @@
           "utcOffset": "UTC",
           "createUser": "/api/3/people/3451141c-bac6-467c-8d72-85e0fab569ce"
         },
-        "enabled": true
+        "enabled": false
       }
       var url = API.WORKFLOW + 'api/scheduled/?depth=2&format=json&limit=' + ALL_RECORDS_SIZE + '&ordering=-modified&search=' + ingestionConnectorDetails.ingestionPlaybook.ingestionConnector.configuration.config_id + '&task=workflow.tasks.periodic_task'
       $resource(url).get({}).$promise.then(function (response) {
         if (response['hydra:member'].length === 0) {
           $resource(API.WORKFLOW + 'api/scheduled/?format').save(queryBody).$promise.then(function (postResponse) {
-            console.log(postResponse);
+            $scope.saveSchedules[tabIndex] = postResponse;
           });
         }
         else {
+          $scope.saveSchedules[tabIndex] = response['hydra:member'][0];
           console.log(response);
         }
+        $scope.scheduleJsonData = angular.copy(ingestionConnectorDetails);
       });
     }
 
@@ -367,84 +392,98 @@
       widgetDataIngestionService.saveDataIngestionParams($scope, timParamsForm, index)
     }
 
+
     function _checkConnectorHealth() {
       $scope.areFeedConnectorsConfigured = true;
-      var toasterMessage = undefined;
-      $scope.installedConnectors.reduce((promise, installedConnector, index) => {
+
+      const promises = $scope.installedConnectors.reduce((promise, installedConnector, index) => {
+        if (!installedConnector.checked) {
+          return promise; // Skip if not checked
+        }
         return promise.then(() => {
           return connectorService.getConnector(installedConnector.name, installedConnector.version)
             .then(connector => {
               if (connector.configuration.length > 0) {
-                const defaultConfiguredConnector = _.find(connector.configuration, { default: true });
-                if (!CommonUtils.isUndefined(defaultConfiguredConnector)) {
-                  return connectorService.getConnectorHealth(
-                    installedConnector,
-                    defaultConfiguredConnector.config_id,
-                    defaultConfiguredConnector.agent
-                  ).then(data => {
-                    if (data.status === "Available") {
-                      $scope.connectorHealthStatus[index] = true;
-                    }
-                  });
-                }
-                else {
-                  toasterMessage = ' ';
-                }
+                return _getConnectorHealth(installedConnector, connector, index);
+              } else {
+                return connectorService.getAgents(connector).then(agents => {
+                  if (agents.length > 0) {
+                    return connectorService.getConnector(agents[0].conn_name, agents[0].conn_version, agents[0].agent)
+                      .then(response => _getConnectorHealth(installedConnector, response, index));
+                  } else {
+                    installedConnector.checked = false;
+                    loadActiveTab(index);
+                    return Promise.resolve(); // Resolve to continue the chain
+                  }
+                });
               }
             });
         });
-      }, Promise.resolve())
+      }, Promise.resolve()); // Start with a resolved promise
+
+      promises
         .then(() => {
-          // This code will execute after all promises in the loop have resolved
-          console.log('All connectors have been processed.');
-          let indices = _.map(_.filter($scope.connectorHealthStatus, value => value === false), (value, index) => $scope.connectorHealthStatus.indexOf(value, index));
-          const notConfigConnectors = _.uniq(indices).map(index => $scope.installedConnectors[index]);
-          if (notConfigConnectors.length === 0) {
-            WizardHandler.wizard('timSolutionpackConfigWizard').next();
-            _getExchangeConnectorDetails();
-          }
-          else {
-            var feedToolIndex = $scope.installedConnectors.indexOf(notConfigConnectors[0]);
-            let notConfigConnectorsLabel = notConfigConnectors.map(connectorLabel => connectorLabel.label);
-            if (!CommonUtils.isUndefined(toasterMessage)) {
-              toasterMessage = 'Connector ' + notConfigConnectorsLabel.join(', ') + ' is not configured';
-            }
-            $scope.params.activeTab = feedToolIndex;
-            loadActiveTab(feedToolIndex);
-            var connectorConfig = document.getElementById('accordion-connector-config-' + feedToolIndex);
-            if (!_.includes(connectorConfig.childNodes[2].classList, "in")) {
-              toggleConnectorConfigSettings(feedToolIndex);
-              $timeout(function () {
-                connectorConfig.childNodes[2].classList.add('in');
-              }, 100);
-            }
-            var paramsConfig = document.getElementById('accordion-params-config-' + feedToolIndex);
-            if (_.includes(paramsConfig.childNodes[2].classList, "in")) {
-              paramsConfig.childNodes[2].classList.replace('in', null);
-              toggleParametersSettings(feedToolIndex);
-            }
-            var schedulrConfig = document.getElementById('accordion-schedule-config-' + feedToolIndex);
-            if (_.includes(schedulrConfig.childNodes[2].classList, "in")) {
-              schedulrConfig.childNodes[2].classList.replace('in', null);
-              toggleScheduleConfigSettings(feedToolIndex);
-            }
-            if (CommonUtils.isUndefined(toasterMessage)) {
-              toasterMessage = 'Connector ' + notConfigConnectorsLabel.join(', ') + ' is not configured';
-              toaster.error({
-                body: toasterMessage
-              });
-            }
-          }
+          $scope.feedIntegrationTools = _.map(
+            _.filter($scope.installedConnectors, { checked: true }),
+            'label'
+          );
+          _getExchangeConnectorDetails();
+          WizardHandler.wizard('timSolutionpackConfigWizard').next();
         })
         .catch(error => {
-          // Handle errors if needed
           console.error('Error fetching connector health:', error);
         })
         .finally(() => {
-          // This code will execute regardless of success or failure of the promises
           console.log('Finished processing all connectors.');
           $scope.areFeedConnectorsConfigured = false;
         });
+    }
+
+    function _getConnectorHealth(installedConnector, connector, index) {
+      const defaultConfiguredConnector = _.find(connector.configuration, { default: true });
+      let toasterMessage;
+
+      if (!CommonUtils.isUndefined(defaultConfiguredConnector)) {
+        return connectorService.getConnectorHealth(
+          installedConnector,
+          defaultConfiguredConnector.config_id,
+          defaultConfiguredConnector.agent
+        ).then(data => {
+          if (!CommonUtils.isUndefined(data.status) && data.status === "Available") {
+            loadActiveTab(index);
+            $scope.connectorHealthStatus[index] = true;
+            return widgetDataIngestionService.activateIngestionPlaybooks($scope.dataIngestCollectionUUIDs[index])
+              .then(() => {
+                $scope.saveSchedules[index].enabled = true;
+                return SchedulesService.saveSchedule($scope.saveSchedules[index]);
+              });
+          } else if (data.id) {
+            return $resource(API.INTEGRATIONS + 'connectors/' + installedConnector.name + '/' + installedConnector.version + '/?format=json&agent=' + data.agent).save({}).$promise.then(function (response) {
+              const defaultAgentConfiguredConnector = _.find(response.configuration, { default: true });
+              if (!CommonUtils.isUndefined(defaultAgentConfiguredConnector)) {
+                if (defaultAgentConfiguredConnector.health_status.status === "Available") {
+                  loadActiveTab(index);
+                  $scope.connectorHealthStatus[index] = true;
+                  return widgetDataIngestionService.activateIngestionPlaybooks($scope.dataIngestCollectionUUIDs[index])
+                    .then(() => {
+                      $scope.saveSchedules[index].enabled = true;
+                      return SchedulesService.saveSchedule($scope.saveSchedules[index]);
+                    });
+                }
+              }
+            });
+          } else {
+            installedConnector.checked = false;
+            loadActiveTab(index);
+            return Promise.resolve(); // Resolve to continue the chain
+          }
+        });
+      } else {
+        toasterMessage = `${installedConnector.name} connector doesn't have a default configuration`;
+        toaster.error({ body: toasterMessage });
+        loadActiveTab(index);
+        return Promise.resolve(); // Resolve to continue the chain
+      }
     }
 
     function _getExchangeConnectorDetails() {
@@ -504,22 +543,41 @@
     function moveToConfigureConnector() {
       $scope.fetchingAvailableConnectors = false;
       $scope.installedConnectors = $scope.feedConnectors.filter(connector => connector.installed === true && connector.selectConnector === true);
-      $scope.toggleConnectorConfig = [];
-      $scope.toggleParametersConfig = [];
-      $scope.toggleScheduleConfig = [];
+      const fortiGuardConnector = _.find($scope.installedConnectors, { label: fortiGuardConnectorName });
+      const filteredConnectors = _.filter($scope.installedConnectors, connector => connector.label !== fortiGuardConnectorName);
+      const sortedConnectors = _.sortBy(filteredConnectors, 'label');
+      $scope.installedConnectors = [fortiGuardConnector].concat(sortedConnectors);
       $scope.healthyConnectors = [];
       $scope.connectorHealthStatus = [];
       $scope.connectorParamsStatus = [];
-      for (let index = 0; index < $scope.installedConnectors.length; index++) {
-        $scope.toggleConnectorConfig[index] = true;
-        $scope.toggleParametersConfig[index] = false;
-        $scope.toggleScheduleConfig[index] = false;
-        $scope.healthyConnectors[index] = false;
-        $scope.connectorHealthStatus[index] = false;
-        $scope.connectorParamsStatus[index] = false;
-      }
+      $scope.installedConnectors.reduce((promise, installedConnector, index) => {
+        return promise.then(() => {
+          installedConnector.checked = true;
+          installedConnector.health = false;
+          $scope.healthyConnectors[index] = false;
+          $scope.connectorHealthStatus[index] = false;
+          $scope.connectorParamsStatus[index] = false;
+          return _loadConnectorAgents(installedConnector, index);
+        });
+      }, Promise.resolve()) // Start with a resolved promise
+        .then(() => {
+          console.log('All connectors have been processed.');
+        })
+        .catch(error => {
+          console.error('Error processing connectors:', error);
+        });
       loadActiveTab($state.params.tabIndex, $state.params.tab);
       WizardHandler.wizard('timSolutionpackConfigWizard').next();
+    }
+
+    function _loadConnectorAgents(installedConnector, index) {
+      let defer = $q.defer();
+      connectorService.getAgents(installedConnector).then(function (installedAgents) {
+        $scope.connectorInstalledOnAgents[index] = installedAgents;
+        //handle toggleAgentMode function promise
+        defer.resolve(installedAgents);
+      });
+      return defer.promise;
     }
   }
 })();

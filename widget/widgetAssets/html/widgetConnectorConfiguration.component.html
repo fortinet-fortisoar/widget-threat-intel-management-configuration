@@ -2,7 +2,7 @@
   MIT License
   Copyright (c) 2024 Fortinet Inc
   Copyright end -->
-<div class="margin-top-lg">
+<div>
    <!-- vault connector message -->
    <div class="row content-detail-tab-container"
       data-ng-if="$ctrl.connectorInfo.tags.indexOf('vault') !== -1 || $ctrl.connectorInfo.tags.indexOf('webserver') !== -1">
@@ -253,17 +253,6 @@
                                     </div>
                                  </div>
                               </div>
-                              <!-- <div class="col-md-5 margin-top-30"
-                                  data-ng-if="$ctrl.connectorInfo.ingestion_supported === true">
-                                  <button class="list-action btn btn-sm btn-second-primary pull-right"
-                                     data-ng-disabled="$ctrl.params.ingestionProcessing === true || $ctrl.configHealthAvailable === false || $ctrl.formHolder.connectorForm[$ctrl.tabIndex].$dirty || $ctrl.formHolder.connectorForm[$ctrl.tabIndex].$invalid"
-                                     title="{{ $ctrl.configHealthAvailable === false ? 'To enable Data ingestion wizard, make sure a connector configuration is marked as \'Default Configuration\' and shows up as \'Available\'.' : ''}}"
-                                     data-ng-click="$ctrl.dataIngestion($ctrl.input.selectedConfiguration)" type="button"
-                                     id="configure-data-ingestion-btn">
-                                     <i data-ng-if="$ctrl.params.ingestionProcessing === true"
-                                        class="fa fa-spin icon icon-refresh margin-right-sm"></i>
-                                     <i class="fa fa-magic margin-right-sm"></i> {{$ctrl.ingestionButtonTitle}}</button>
-                               </div> -->
                            </div>
                            <div class="row">
                               <div class="col-md-6">
@@ -277,11 +266,6 @@
                                        Mark as default configuration</label>
                                  </div>
                               </div>
-                              <!-- <div class="col-md-6" data-ng-show="$ctrl.permissions.security.read">
-                                  <div data-connector-ownership data-ng-model="$ctrl.input.selectedConfiguration"
-                                     data-owners="$ctrl.owners" data-form="$ctrl.formHolder.connectorForm[$ctrl.tabIndex]">
-                                  </div>
-                               </div> -->
                            </div>
                            <cs-connector-field-renderer data-cs-form="$ctrl.formHolder.connectorForm[$ctrl.tabIndex]"
                               data-json-fields="$ctrl.input.selectedConfiguration.fields"
@@ -306,7 +290,4 @@
          data-ng-disabled="!$ctrl.formHolder.connectorForm[$ctrl.tabIndex].$dirty || $ctrl.formHolder.connectorForm[$ctrl.tabIndex].$invalid || $ctrl.saveProcessing"><i
             class="icon icon-check margin-right-sm"></i>Save</button>
    </div>
-   <!-- <div class="connector-config-button margin-left-15">
-       <button type="button" class="btn btn-default pull-left btn-sm margin-left-55" data-ng-click="$ctrl.closePanel()" id="cancel-connector-config-btn-{{$ctrl.tabIndex}}"><i class="icon icon-close margin-right-sm"></i>Cancel</button>
-    </div> -->
 </div>

@@ -8,9 +8,9 @@
         .module('cybersponse')
         .factory('threatIntelManagementConfigurationService', threatIntelManagementConfigurationService);
 
-    threatIntelManagementConfigurationService.$inject = ['marketplaceService', '$q', '$http', 'API', 'ALL_RECORDS_SIZE', '$filter', 'Modules', 'CommonUtils', '$window'];
+    threatIntelManagementConfigurationService.$inject = ['marketplaceService', '$q', '$http', 'API', 'ALL_RECORDS_SIZE', '$filter', 'Modules', 'CommonUtils', '$window', '$resource'];
 
-    function threatIntelManagementConfigurationService(marketplaceService, $q, $http, API, ALL_RECORDS_SIZE, $filter, Modules, CommonUtils, $window) {
+    function threatIntelManagementConfigurationService(marketplaceService, $q, $http, API, ALL_RECORDS_SIZE, $filter, Modules, CommonUtils, $window, $resource) {
 
         const WAIT_IN_SEC = 5000;
 
@@ -19,7 +19,8 @@
             configFortiGuardConnector: configFortiGuardConnector,
             installConnector: installConnector,
             getConnectorInstallationProgress: getConnectorInstallationProgress,
-            ingestionRecordTags: ingestionRecordTags
+            ingestionRecordTags: ingestionRecordTags,
+            //activateSchedule: activateSchedule
         };
 
         function installConnector(connector) {
@@ -100,7 +101,6 @@
                 appendQueryString = 'solutionpacks?$limit=' + ALL_RECORDS_SIZE + '&$page=1';
             }
             var params = returnParam();
-            // params.__selectFields = ['name', 'installed', 'type', 'display', 'label', 'version', 'publisher', 'certified', 'iconLarge', 'description', 'latestAvailableVersion', 'draft', 'local', 'status', 'featuredTags', 'featured'];
             $http.post(API.QUERY + appendQueryString, params).then(function (response) {
                 defer.resolve(response);
             }, function (error) {
@@ -108,6 +108,23 @@
             });
             return defer.promise;
         }
+
+        // function activateSchedule(scheduledID) {
+        //     var deferred = $q.defer();
+        //     $resource(API.WORKFLOW + 'api/scheduled/'+ scheduledID + '/?format=json', null, {
+        //       'update': {
+        //         method: 'PUT'
+        //       }
+        //     }).update({
+        //       'enabled': true
+        //     }).$promise.then(function(userDetails) {
+        //       deferred.resolve(userDetails);
+        //     }, function(failed) {
+        //       $log.error('Could not activate schedule: ', failed);
+        //       deferred.reject(failed);
+        //     });
+        //     return deferred.promise;
+        //   }
 
         function ingestionRecordTags() {
             return {
