@@ -197,24 +197,21 @@
                     <div ng-if="connector.selectConnector" ng-repeat="connector in feedConnectors"
                         class="padding-5 display-flex-space-between"
                         style="border: 1px solid #29323E;padding: 10px; width: 85%; margin-bottom: 10px;">
-                        <div style="color: #D2D5DA;"
-                            class="padding-5 queue-card-header-text margin-right-3 font-size-14">
+                        <div class="padding-5 queue-card-header-text margin-right-3 font-size-14">
                             {{connector.label}}
                         </div>
                         <div
                             class="font-size-14 text-center margin-top-sm margin-bottom-sm justify-content margin-left-auto margin-right-sm">
                             <i data-ng-if="!connector.installed && connector.selectConnector"
                                 class="text-color-warning icon icon-installing-lodder-static"></i>
-                            <span data-ng-if="!connector.installed && connector.selectConnector"
-                                style="color: #D2D5DA;">Installing...</span>
+                            <span data-ng-if="!connector.installed && connector.selectConnector">Installing...</span>
                             <i data-ng-if="connector.installed && connector.selectConnector"
                                 class="text-success icon icon-check"></i>
-                            <span data-ng-if="connector.installed && connector.selectConnector"
-                                style="color: #D2D5DA;">Installed</span>
+                            <span data-ng-if="connector.installed && connector.selectConnector">Installed</span>
                             <i data-ng-if="!connector.installed && !connector.selectConnector"
                                 class="text-danger icon icon-failed"></i>
-                            <span data-ng-if="!connector.installed && !connector.selectConnector"
-                                style="color: #D2D5DA;">Installed Failed</span>
+                            <span data-ng-if="!connector.installed && !connector.selectConnector">Installed
+                                Failed</span>
                         </div>
                     </div>
                 </div>

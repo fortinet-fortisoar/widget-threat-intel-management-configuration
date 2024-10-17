@@ -91,6 +91,22 @@
     init();
 
     function init() {
+      _getKeyStoreRecord();
+      $scope.isFortiGuardConnectorInstalled = true;
+      appModulesService.load(true).then(function (modules) {
+        modules = $filter('playbookModules')(modules);
+        $scope.modules = currentPermissionsService.availablePermissions(modules, 'create');
+      });
+      $scope.allowPlaybookEdit = currentPermissionsService.availablePermission('workflows', 'create') || currentPermissionsService.availablePermission('workflows', 'update');
+      Modules.get({
+        module: 'teams',
+        $limit: self.ALL_RECORDS_SIZE,
+      }).$promise.then(function (result) {
+        $scope.owners = result['hydra:member'];
+      });
+    }
+
+    function _getKeyStoreRecord() {
       var pagedCollection = new PagedCollection('keys');
       var query = {
         logic: 'AND',
@@ -108,18 +124,6 @@
         if (pagedCollection.data['hydra:member'].length > 0 > 0) {
           $scope.feedRules = pagedCollection.data['hydra:member'][0].jSONValue;
         }
-      });
-      $scope.isFortiGuardConnectorInstalled = true;
-      appModulesService.load(true).then(function (modules) {
-        modules = $filter('playbookModules')(modules);
-        $scope.modules = currentPermissionsService.availablePermissions(modules, 'create');
-      });
-      $scope.allowPlaybookEdit = currentPermissionsService.availablePermission('workflows', 'create') || currentPermissionsService.availablePermission('workflows', 'update');
-      Modules.get({
-        module: 'teams',
-        $limit: self.ALL_RECORDS_SIZE,
-      }).$promise.then(function (result) {
-        $scope.owners = result['hydra:member'];
       });
     }
 
@@ -255,7 +259,7 @@
     }
 
     function moveToFinish() {
-       let feedIntegrationNames = _.map(
+      let feedIntegrationNames = _.map(
         _.filter($scope.installedConnectors, { checked: true }),
         'label'
       );

@@ -334,8 +334,6 @@
       }
       if (!self.selectedAgent) {
         self.checkHealth(status);
-      } else {
-        //self.checkIngestionEnable();
       }
       self.input.oldSelectedConfiguration = angular.copy(self.input.selectedConfiguration);
       self.subscribeConfiguration();
