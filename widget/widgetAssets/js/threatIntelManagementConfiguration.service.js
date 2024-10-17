@@ -100,7 +100,6 @@
                 appendQueryString = 'solutionpacks?$limit=' + ALL_RECORDS_SIZE + '&$page=1';
             }
             var params = returnParam();
-            // params.__selectFields = ['name', 'installed', 'type', 'display', 'label', 'version', 'publisher', 'certified', 'iconLarge', 'description', 'latestAvailableVersion', 'draft', 'local', 'status', 'featuredTags', 'featured'];
             $http.post(API.QUERY + appendQueryString, params).then(function (response) {
                 defer.resolve(response);
             }, function (error) {
