@@ -26,27 +26,33 @@
     $scope.moveToFinish = moveToFinish;
     $scope.installConnector = installConnector;
     $scope.close = close;
-    $scope.connectorInstalledOnAgents = [];
     $scope.toggleSelectFeedsSettings = toggleSelectFeedsSettings;
-    $scope.dataIngestionParamsUpdating = false;
-    $scope.areFeedConnectorsConfigured = false;
-    $scope.toggleConnectorConfig = [];
-    $scope.toggleParametersConfig = [];
-    $scope.dataIngestCollectionUUIDs = [];
-    $scope.saveSchedules = [];
+    $scope.loadActiveTab = loadActiveTab;
     $scope.toggleFeedRules = toggleFeedRules;
     $scope.saveParams = saveParams;
+    $scope.dataIngestionParamsUpdating = false;
+    $scope.areFeedConnectorsConfigured = false;
     $scope.allConnectorsInstalled = false;
-    $scope.loadActiveTab = loadActiveTab;
+    $scope.connectorInstalledOnAgents = [];
+    $scope.dataIngestCollectionUUIDs = [];
+    $scope.saveSchedules = [];
     $scope.feedConnectors = [];
     $scope.healthyConnectors = [];
     $scope.installedConnectors = [];
-    $scope.samplePlaybookEntity = {};
-    $scope.ingestMethodActions = {};
-    $scope.searchQuery = '';
     $scope.healthyConnectorsParams = [];
     $scope.connectorHealthStatus = [];
     $scope.connectorParamsStatus = [];
+    $scope.samplePlaybookEntity = {};
+    $scope.ingestMethodActions = {};
+    $scope.connectorFetchIndex = {};
+    $scope.connectorConfigIndex = {};
+    $scope.toggleFeedToIndicatorLinking = { open: true };
+    $scope.toggleHighConfidenceThreatFeeds = { open: false };
+    $scope.toggleUnstructuredFeedsSupport = { open: false };
+    $scope.toggleConnectorConfigSettings = { open: true };
+    $scope.toggleParametersSettings = { open: false };
+    $scope.toggleScheduleConfigSettings = { open: false };
+    $scope.searchQuery = '';
     $scope.scheduleJsonData = undefined;
     $scope.params = {
       activeTab: 0
@@ -70,11 +76,6 @@
         ingestFeedsFromEmail: false
       }
     };
-    $scope.toggleFeedToIndicatorLinking = { open: true };
-    $scope.toggleHighConfidenceThreatFeeds = { open: false };
-    $scope.toggleUnstructuredFeedsSupport = { open: false };
-    $scope.connectorFetchIndex = {};
-    $scope.connectorConfigIndex = {};
     $scope.isLightTheme = $rootScope.theme.id === 'light';
     $scope.widgetBasePath = widgetBasePath;
     $scope.startInfoGraphics = $scope.isLightTheme ? widgetBasePath + 'images/start-light.svg' : widgetBasePath + 'images/start-dark.svg';
@@ -85,9 +86,6 @@
     $scope.finishInfoGraphics = widgetBasePath + 'images/finish.png';
     $scope.widgetCSS = widgetBasePath + 'widgetAssets/css/wizard-style.css';
     const fortiGuardConnectorName = 'Fortinet FortiGuard Threat Intelligence';
-    $scope.toggleConnectorConfigSettings = { open: true };
-    $scope.toggleParametersSettings = { open: false };
-    $scope.toggleScheduleConfigSettings = { open: false };
     init();
 
     function init() {
@@ -142,6 +140,21 @@
     function toggleSelectFeedsSettings(event) {
       event.stopPropagation();
     }
+
+    $scope.removeTab = function (index) {
+      $scope.installedConnectors.splice(index, 1);
+      $scope.connectorInstalledOnAgents.splice(index, 1);
+      $scope.dataIngestCollectionUUIDs.splice(index, 1);
+      $scope.saveSchedules.splice(index, 1);
+      if ($scope.params.activeTab === index) {
+        // Set active tab to the previous tab if available
+        $scope.params.activeTab = Math.max(0, index - 1);
+      } else if ($scope.params.activeTab > index) {
+        // If the active tab was after the removed tab, decrement the active tab index
+        $scope.params.activeTab--;
+      }
+      loadActiveTab(0);
+    };
 
     function installConnector() {
       WizardHandler.wizard('timSolutionpackConfigWizard').next();
@@ -228,7 +241,6 @@
       if (connectorConfig.status === "Available") {
         if (!$scope.healthyConnectors[connector.tabIndex]) {
           $scope.installedConnectors[connector.tabIndex].health = true;
-          $scope.installedConnectors[connector.tabIndex].checked = true;
           _.assign(connector.connectorInfo, { "configuration": connectorConfig });
           _.assign(connector.connectorInfo, { "playbook_collections": connector.connectorInfo.playbook_collections[0] });
           _.assign(connector.connectorInfo, { "uuid": $scope.installedConnectors[connector.tabIndex].uuid });
@@ -237,7 +249,6 @@
       }
       else {
         $scope.installedConnectors[connector.tabIndex].health = false;
-        $scope.installedConnectors[connector.tabIndex].checked = false;
         $scope.toggleConnectorConfigSettings = { open: true };
         $scope.toggleParametersSettings = { open: false };
         $scope.toggleScheduleConfigSettings = { open: false };
@@ -259,10 +270,7 @@
     }
 
     function moveToFinish() {
-      let feedIntegrationNames = _.map(
-        _.filter($scope.installedConnectors, { checked: true }),
-        'label'
-      );
+      let feedIntegrationNames = _.map($scope.installedConnectors, 'label');
       $scope.displayFeedIntegrations = feedIntegrationNames.join(', ');
       var queryPayload =
       {
@@ -399,11 +407,7 @@
 
     function _checkConnectorHealth() {
       $scope.areFeedConnectorsConfigured = true;
-
       const promises = $scope.installedConnectors.reduce((promise, installedConnector, index) => {
-        if (!installedConnector.checked) {
-          return promise; // Skip if not checked
-        }
         return promise.then(() => {
           return connectorService.getConnector(installedConnector.name, installedConnector.version)
             .then(connector => {
@@ -415,22 +419,42 @@
                     return connectorService.getConnector(agents[0].conn_name, agents[0].conn_version, agents[0].agent)
                       .then(response => _getConnectorHealth(installedConnector, response, index));
                   } else {
-                    installedConnector.checked = false;
+                    toaster.error({
+                      body: 'The' + installedConnector.label + ' is not configured. To proceed with the wizard, please close the ' + installedConnector.label + ' tab.'
+                    });
                     loadActiveTab(index);
-                    return Promise.resolve(); // Resolve to continue the chain
+                    return Promise.reject(); // Resolve to continue the chain
                   }
                 });
               }
             });
         });
       }, Promise.resolve()); // Start with a resolved promise
-
       promises
         .then(() => {
-          $scope.feedIntegrationTools = _.map(
-            _.filter($scope.installedConnectors, { checked: true }),
-            'label'
-          );
+          $scope.installedConnectors.reduce((promise, configConnector, index) => {
+            return promise.then(() => {
+              const metaData = {
+                "name": $scope.saveSchedules[index].name,
+                "description": "Metadata for " + $scope.saveSchedules[index].description,
+                "modified_by": "3451141c-bac6-467c-8d72-85e0fab569ce",
+                "owners": [],
+                "connector": {
+                  "name": configConnector.name,
+                  "version": configConnector.version
+                },
+                "configuration": configConnector.connectorInfo.configuration[0].config_id,
+                "metadata": {
+                  "scheduleId": $scope.saveSchedules[index].id,
+                  "scheduleName": $scope.saveSchedules[index].name,
+                  "scheduleStatus": true
+                }
+              };
+              return SchedulesService.saveScheduleMetadata(metaData);
+            });
+          }, Promise.resolve());
+
+          $scope.feedIntegrationTools = _.map($scope.installedConnectors, 'label');
           _getExchangeConnectorDetails();
           WizardHandler.wizard('timSolutionpackConfigWizard').next();
         })
@@ -446,7 +470,6 @@
     function _getConnectorHealth(installedConnector, connector, index) {
       const defaultConfiguredConnector = _.find(connector.configuration, { default: true });
       let toasterMessage;
-
       if (!CommonUtils.isUndefined(defaultConfiguredConnector)) {
         return connectorService.getConnectorHealth(
           installedConnector,
@@ -468,25 +491,30 @@
                 if (defaultAgentConfiguredConnector.health_status.status === "Available") {
                   loadActiveTab(index);
                   $scope.connectorHealthStatus[index] = true;
-                  return widgetDataIngestionService.activateIngestionPlaybooks($scope.dataIngestCollectionUUIDs[index])
-                    .then(() => {
-                      $scope.saveSchedules[index].enabled = true;
-                      return SchedulesService.saveSchedule($scope.saveSchedules[index]);
+                  if (!CommonUtils.isUndefined($scope.dataIngestCollectionUUIDs[index])) {
+                    $scope.connectorHealthStatus[index] = true;
+                    return widgetDataIngestionService.activateIngestionPlaybooks($scope.dataIngestCollectionUUIDs[index])
+                      .then(() => {
+                        $scope.saveSchedules[index].enabled = true;
+                        return SchedulesService.saveSchedule($scope.saveSchedules[index]);
+                      });
+                  }
+                  else {
+                    toaster.error({
+                      body: 'The agent configuration found for ' + installedConnector.label + '. Check the health check to configure the data ingetion'
                     });
+                    return Promise.reject();
+                  }
                 }
               }
             });
-          } else {
-            installedConnector.checked = false;
-            loadActiveTab(index);
-            return Promise.resolve(); // Resolve to continue the chain
           }
         });
       } else {
-        toasterMessage = `${installedConnector.name} connector doesn't have a default configuration`;
+        toasterMessage = installedConnector.label + 'connector doesn\'t have a default configuration';
         toaster.error({ body: toasterMessage });
         loadActiveTab(index);
-        return Promise.resolve(); // Resolve to continue the chain
+        return Promise.reject(); // Reject to break the chain
       }
     }
 
@@ -556,7 +584,6 @@
       $scope.connectorParamsStatus = [];
       $scope.installedConnectors.reduce((promise, installedConnector, index) => {
         return promise.then(() => {
-          installedConnector.checked = true;
           installedConnector.health = false;
           $scope.healthyConnectors[index] = false;
           $scope.connectorHealthStatus[index] = false;
