@@ -18,17 +18,16 @@
                     <div class="font-size-25 muted-80 line-height-1 padding-bottom-md">Welcome</div>
                     <div
                         class="solid-border element-secondary-bgcolor margin-right-25 padding-top-md padding-bottom-md">
-                        <p class="margin-left-15 font-Size-13 muted"><span>This wizard is designed to assist you
-                                in setting up Threat Intel Management within your FortiSOAR environment. It will
-                                guide you through selecting and configuring feed integrations, scheduling feed
-                                ingestion, adjusting Threat Intel settings, and configuring Solution Packs to
-                                enhance your threat intelligence infrastructure.</span></p>
+                        <p class="margin-left-15 font-Size-13 muted"><span>Use this wizard to set up Threat Intel
+                                Management in your FortiSOAR environment. The wizard helps you select and configure feed
+                                integrations, schedule feed ingestion, adjust Threat Intel settings, and configure
+                                Solution Packs to enhance your threat intelligence capabilities.</span></p>
                         <h6 class="margin-left-15 font-weight-normal margin-bottom-sm modal-title text-transform-none">
                             Prerequisites</h6>
                         <p class="font-Size-13 margin-bottom-0 margin-left-15 muted">
-                            <span>Before we start, please make sure you have the required configuration details
-                                for the integrations ready. These details will be essential as we set up your
-                                threat intelligence management system.</span>
+                            <span>Before starting, ensure you have the necessary configuration details for the
+                                integrations. These details are required to set up your threat intelligence management
+                                system.</span>
                         </p>
                     </div>
                     <button type="button" class="btn btn-primary btn-sm margin-top-xlg text-transform-none font-size-14"
@@ -54,16 +53,15 @@
                 <div class="col-md-7">
                     <div class="font-size-25 muted-80 line-height-1 padding-bottom-md">Select Feed Integrations
                     </div>
-                    <p class="font-Size-13 muted"><span>Select necessary feed sources to fetch and ingest feeds
-                            into the FortiSOAR Threat Feed module. </span></p>
+                    <p class="font-Size-13 muted"><span>Select the feed sources to fetch and ingest data into the
+                            FortiSOAR Threat Feed module.</span></p>
                     <div
                         class="solid-border element-secondary-bgcolor padding-20 margin-top-md padding-top-md padding-bottom-md">
                         <h6 class="font-weight-normal margin-bottom-sm modal-title text-transform-none">
                             Default Feed Sources</h6>
                         <p class="font-Size-13 muted">
-                            <span>As part of the Threat Intel Management Solution Pack installation, FortiGuard
-                                Threat Intel integration is automatically installed and configured to retrieve
-                                the feeds.</span>
+                            <span>The FortiGuard Threat Intel integration is automatically installed and configured to
+                                retrieve feeds as part of the Threat Intel Management Solution Pack installation.</span>
                         </p>
                         <div class="display-flex font-size-12">
                             <img src="{{fortiGuardConnector.iconLarge}}" alt="" height="60px"
@@ -100,8 +98,8 @@
                         <h6 class="font-weight-normal margin-bottom-sm modal-title text-transform-none">
                             Additional Feed Sources</h6>
                         <p class="margin-bottom-sm font-Size-13 muted">
-                            <span>Select the integrations from the list of Additional Feed sources that you wish
-                                to fetch feeds from.</span>
+                            <span>Select the integrations from the list of additional feed sources to fetch
+                                feeds.</span>
                         </p>
                         <input class="form-control margin-bottom-sm" type="text" placeholder="Search"
                             ng-model="searchQuery" />
@@ -189,8 +187,8 @@
                 <div class="col-md-7">
                     <div class="font-size-25 muted-80 line-height-1 padding-bottom-md">Install Feed Integrations
                     </div>
-                    <p class="font-Size-13 muted"><span>On this page, you will find the installation status of
-                            the feed integration you selected on the previous page.</span></p>
+                    <p class="font-Size-13 muted"><span>This page shows the installation status of the feed integrations
+                            you selected on the previous page.</span></p>
                     <p class="font-Size-13 muted">
                         <span>Total Connectors {{getSelectedConnectorsCount}}</span>
                     </p>
@@ -242,11 +240,11 @@
                                 <uib-tab data-ng-repeat="timTool in installedConnectors track by $index" index="$index"
                                     data-ng-click="loadActiveTab($index)">
                                     <uib-tab-heading>
-                                        <input type="checkbox" id="checkbox-{{$index}}" class="selectedInstallConnector"
-                                            ng-model="timTool.checked" data-ng-disabled="timTool.health"
-                                            ng-click="$event.stopPropagation()">
-                                        <label class="padding-left-sm" for="checkbox-{{$index}}">{{ timTool.label
-                                            }}</label>
+                                        <span class="tab-label padding-left-sm">{{ timTool.label }}</span>
+                                        <button type="button" class="close-icon font-9px font-color-danger"
+                                            ng-click="removeTab($index); $event.stopPropagation(); $event.preventDefault();">
+                                            <i class="icon icon-close"></i>
+                                        </button>
                                     </uib-tab-heading>
                                     <div class="col-md-5 display-flex align-items-center">
                                         <div class="full-width info-graphic-margin">
@@ -257,7 +255,7 @@
                                         <form name="params.timConfigForm">
                                             <div
                                                 class="font-size-25 line-height-1 margin-bottom-lg margin-top-18 muted-80">
-                                                Configure {{ timTool.label }} Integration</div>
+                                                Configure {{ timTool.label }}</div>
                                             <div class="form-group">
                                                 <uib-accordion close-others="true">
                                                     <div uib-accordion-group class="panel-default"
@@ -397,15 +395,15 @@
                                                         </div>
                                                     </div>
                                                 </uib-accordion>
+                                            </div>
                                         </form>
                                     </div>
+                                </uib-tab>
+                            </uib-tabset>
                         </div>
-                        </uib-tab>
-                        </uib-tabset>
                     </div>
                 </div>
             </div>
-        </div>
         </div>
         <div class="ingestion-modal-footer">
             <button type="button" class="btn btn-sm btn-second-primary margin-top-lg margin-left-lg"
@@ -429,35 +427,34 @@
                 </div>
                 <div class="col-md-7">
                     <div class="font-size-25 muted-80 line-height-1 padding-bottom-md">Feed Rules</div>
-                    <p class="font-Size-13 muted"><span>On this page, you can configure the threat feed rules
-                            based on which
-                            you will manage the threat intelligence from different sources.</span></p>
+                    <p class="font-Size-13 muted"><span>Configure threat feed rules on this page to manage threat
+                            intelligence from different sources.</span></p>
                     <uib-accordion close-others="true">
                         <div uib-accordion-group class="panel-default" id="accordion-feed-to-indicator-linking"
                             is-open="toggleFeedToIndicatorLinking.open"
                             data-ng-disabled="!feedRules.feedToIndicatorLinking.enabled"
                             ng-form="feedToIndicatorLinkingForm">
                             <uib-accordion-heading class="padding-md">
-                                <div class="display-flex">
-                                    <div data-ng-class="{'queue-text-active-color': toggleFeedToIndicatorLinking.open}"
-                                        data-ng-click="toggleFeedRules(feedRules.feedToIndicatorLinking, $event)">
-                                        <div class="margin-right-lg pull-left">
-                                            <span class="queue-card-actions">&nbsp;<i class="fa"
-                                                    data-ng-class="toggleFeedToIndicatorLinking.open===true ? 'fa-chevron-down' : 'fa-chevron-right'"></i></span>
-                                        </div>
-                                        <div class="pull-left queue-card-header-text margin-right-3">Feed To
+                                <div data-ng-class="{'queue-text-active-color': toggleFeedToIndicatorLinking.open}"
+                                    data-ng-click="toggleFeedRules(feedRules.feedToIndicatorLinking, $event)">
+                                    <div class="margin-right-lg pull-left">
+                                        <span class="queue-card-actions">&nbsp;<i class="fa"
+                                                data-ng-class="toggleFeedToIndicatorLinking.open===true ? 'fa-chevron-down' : 'fa-chevron-right'"></i></span>
+                                    </div>
+                                    <div class="display-flex" style="justify-content: space-between;">
+                                        <div class="queue-card-header-text margin-right-3">Feed To
                                             Indicator Linking</div>
-                                        <div class="pull-right margin-right-md">
+                                        <div class="margin-right-md">
                                             <label class="margin-0 switch switch-pill switch-label switch-success">
                                                 <input type="checkbox" class="switch-input"
                                                     id="feed-to-indicator-linking-switch-slider"
                                                     name="feed-to-indicator-linking-switch-slider"
-                                                    data-ng-model="feedRules.feedToIndicatorLinking.enabled" />
+                                                    data-ng-model="feedRules.feedToIndicatorLinking.enabled"
+                                                    ng-click="toggleHnadler($event)" />
                                                 <span class="switch-slider" data-checked="Enabled"
                                                     data-unchecked="Disabled"></span>
                                             </label>
                                         </div>
-                                        <div class="clearfix"></div>
                                     </div>
                                 </div>
                             </uib-accordion-heading>
@@ -466,12 +463,12 @@
                                     The reputation will be automatically updated to reflect the feed's
                                     reputation, provided that the feed confidence meets or exceeds the
                                     specified threshold.</span></p>
-                            <div class=" form-group margin-top-negative-10 padding-left-lg padding-right-lg overflow-auto query-section"
+                            <div class="form-group margin-top-negative-10 padding-left-lg padding-right-lg overflow-auto query-section"
                                 data-ng-class="{ 'has-error':
                                                 feedToIndicatorLinkingForm.feedConfidenceThreshold.$invalid &&
                                                 feedToIndicatorLinkingForm.feedConfidenceThreshold.$touched }">
-                                <label for="feedConfidenceThreshold" class="control-label">Select Feed
-                                    Confidence Threshold<span class="required text-danger">*</span>
+                                <label for="feedConfidenceThreshold" class="control-label">Select Feed Confidence
+                                    Threshold<span class="required text-danger">*</span>
                                 </label>
                                 <input id="feedConfidenceThreshold" style="width: 300px;" name="feedConfidenceThreshold"
                                     type="number" data-ng-min="0" min="0" step="1" data-ng-max="100" max="100"
@@ -488,16 +485,16 @@
                             data-ng-disabled="!feedRules.highConfidenceThreatFeeds.enabled"
                             ng-form="highConfidenceThreatFeedsForm">
                             <uib-accordion-heading class="padding-md">
-                                <div class="display-flex">
-                                    <div data-ng-class="{'queue-text-active-color': toggleHighConfidenceThreatFeeds.open}"
-                                        data-ng-click="toggleFeedRules(feedRules.highConfidenceThreatFeeds, $event)">
-                                        <div class="margin-right-lg pull-left">
-                                            <span class="queue-card-actions">&nbsp;<i class="fa"
-                                                    data-ng-class="toggleHighConfidenceThreatFeeds.open===true ? 'fa-chevron-down' : 'fa-chevron-right'"></i></span>
-                                        </div>
-                                        <div class=" pull-left queue-card-header-text margin-right-3">High
-                                            Confidence Threat Feed Block</div>
-                                        <div class="pull-right margin-right-md">
+                                <div data-ng-class="{'queue-text-active-color': toggleHighConfidenceThreatFeeds.open}"
+                                    data-ng-click="toggleFeedRules(feedRules.highConfidenceThreatFeeds, $event)">
+                                    <div class="margin-right-lg pull-left">
+                                        <span class="queue-card-actions">&nbsp;<i class="fa"
+                                                data-ng-class="toggleHighConfidenceThreatFeeds.open===true ? 'fa-chevron-down' : 'fa-chevron-right'"></i></span>
+                                    </div>
+                                    <div class="display-flex" style="justify-content: space-between;">
+                                        <div class="queue-card-header-text margin-right-3">High Confidence
+                                            Threat Feed Block</div>
+                                        <div class="margin-right-md">
                                             <label class="margin-0 switch switch-pill switch-label switch-success">
                                                 <input type="checkbox" class="switch-input"
                                                     id="high-confidence-threat-feeds-switch-slider"
@@ -507,14 +504,13 @@
                                                     data-unchecked="Disabled"></span>
                                             </label>
                                         </div>
-                                        <div class="clearfix"></div>
                                     </div>
                                 </div>
                             </uib-accordion-heading>
                             <div>
-                                <p class="font-Size-13 muted margin-top-negative-20"><span>This rule will Block
-                                        Enriched Malicious Feeds with confidence greater than specified
-                                        threshold and selected feed integrations.</span></p>
+                                <p class="font-Size-13 muted margin-top-negative-20"><span>This rule blocks enriched
+                                        malicious feeds with confidence greater than the specified threshold and from
+                                        the selected feed integrations.</span></p>
                                 <div class="form-group margin-top-negative-10 padding-left-lg padding-right-lg overflow-auto query-section"
                                     data-ng-class="{ 'has-error':
                                                 highConfidenceThreatFeedsForm.feedConfidenceThreshold.$invalid &&
@@ -559,16 +555,16 @@
                             data-ng-disabled="!feedRules.unstructuredFeedsSupport.enabled"
                             ng-form="unstructuredFeedsSupportForm">
                             <uib-accordion-heading class="padding-md">
-                                <div class="display-flex">
-                                    <div data-ng-class="{'queue-text-active-color': toggleUnstructuredFeedsSupport.open}"
-                                        data-ng-click="toggleFeedRules(feedRules.unstructuredFeedsSupport, $event)">
-                                        <div class="margin-right-lg pull-left">
-                                            <span class="queue-card-actions">&nbsp;<i class="fa"
-                                                    data-ng-class="toggleUnstructuredFeedsSupport.open===true ? 'fa-chevron-down' : 'fa-chevron-right'"></i></span>
-                                        </div>
-                                        <div class=" pull-left queue-card-header-text margin-right-3">
+                                <div data-ng-class="{'queue-text-active-color': toggleUnstructuredFeedsSupport.open}"
+                                    data-ng-click="toggleFeedRules(feedRules.unstructuredFeedsSupport, $event)">
+                                    <div class="margin-right-lg pull-left">
+                                        <span class="queue-card-actions">&nbsp;<i class="fa"
+                                                data-ng-class="toggleUnstructuredFeedsSupport.open===true ? 'fa-chevron-down' : 'fa-chevron-right'"></i></span>
+                                    </div>
+                                    <div class="display-flex" style="justify-content: space-between;">
+                                        <div class="queue-card-header-text margin-right-3">
                                             Unstructured Feeds Support</div>
-                                        <div class="pull-right margin-right-md">
+                                        <div class="margin-right-md">
                                             <label class="margin-0 switch switch-pill switch-label switch-success">
                                                 <input type="checkbox" class="switch-input"
                                                     id="high-confidence-threat-feeds-switch-slider"
@@ -578,14 +574,11 @@
                                                     data-unchecked="Disabled"></span>
                                             </label>
                                         </div>
-                                        <div class="clearfix"></div>
                                     </div>
                                 </div>
                             </uib-accordion-heading>
-                            <p class="font-Size-13 muted margin-top-negative-20 section-form"><span>This
-                                    rule will help
-                                    to ingest the unstructured feed data from email or file(csv or
-                                    text).</span></p>
+                            <p class="font-Size-13 muted margin-top-negative-20 section-form"><span>This rule helps
+                                    ingest unstructured feed data from emails or files (CSV or text).</span></p>
                             <div
                                 class=" form-group margin-top-negative-10 padding-left-lg padding-right-lg overflow-auto query-section">
                                 <div class="checkbox-inline section-form" style="width: 660px;">
@@ -594,8 +587,8 @@
                                             ng-checked="true"
                                             data-ng-model="feedRules.unstructuredFeedsSupport.ingestFeedsFromFile"
                                             data-ng-disabled="!feedRules.unstructuredFeedsSupport.enabled" />
-                                        <span class="display-inline-block margin-top-1">Ingest Unstructured
-                                            Feeds from Files</span>
+                                        <span class="display-inline-block margin-top-1">Ingest Unstructured Feeds from
+                                            Files</span>
                                     </label>
                                     <span
                                         data-uib-tooltip="By enabling this option, users can upload unstructured feeds in CSV or TXT format into the threat feed module."
@@ -608,8 +601,8 @@
                                         <input id="ingestFeedsFromEmail" type="checkbox" name="ingestFeedsFromEmail"
                                             data-ng-model="feedRules.unstructuredFeedsSupport.ingestFeedsFromEmail"
                                             data-ng-disabled="!feedRules.unstructuredFeedsSupport.enabled" />
-                                        <span class="display-inline-block margin-top-1">Ingest Unstructured
-                                            Feeds from Email</span>
+                                        <span class="display-inline-block margin-top-1">Ingest Unstructured Feeds from
+                                            Email</span>
                                     </label>
                                     <span
                                         data-uib-tooltip="By enabling this option, users can email unstructured feeds in CSV or TXT format for ingestion into the threat feed module."
@@ -617,10 +610,9 @@
                                             class="margin-left-sm icon icon-information font-Size-13">
                                         </i></span><br>
                                     <small class="muted italic">
-                                        Note: To configure the email ingestion make sure to configure the <a
-                                            title="Exchange"
+                                        Note: To configure email ingestion, ensure the <a title="Exchange"
                                             href="/content-hub/my-content/?contentType=connector&uuid={{exchangeUUID}}"
-                                            target="_blank" rel="noopener">Exchange</a> connector.
+                                            target="_blank" rel="noopener">Exchange</a> connector is set up.
                                     </small>
                                 </div>
                             </div>
@@ -652,72 +644,69 @@
                         <div class="data-ingestion-summary padding-top-lg">
                             <h6 class="font-weight-normal margin-bottom-sm modal-title text-transform-none">
                                 Quick Summary</h6>
-                            <p><i class="completed icon icon-approval margin-right-md font-size-16"></i><span
-                                    class="bold muted">Selected threat feed integration:
-                                    {{displayFeedIntegrations}}</span></p>
-                            <p><i class="completed icon icon-approval margin-right-md font-size-16"></i><span
-                                    class="bold muted">Threat feed parameters set for
-                                    {{displayFeedIntegrations}} </span></p>
-                            <p><i class="completed icon icon-approval margin-right-md font-size-16"></i><span
-                                    class="bold muted">Threat feed ingestion schedule is set to Every hour
+                            <p><i class="completed icon icon-approval margin-right-md font-size-16"></i><span>Selected
+                                    threat feed integration: <strong>{{displayFeedIntegrations}}</strong></span></p>
+                            <p><i class="completed icon icon-approval margin-right-md font-size-16"></i><span>Set threat
+                                    feed parameters for <strong>{{displayFeedIntegrations}}</strong></span></p>
+                            <p><i class="completed icon icon-approval margin-right-md font-size-16"></i><span>Threat
+                                    feed ingestion schedule: <strong>Every hour</strong></span>
+                            </p>
+                            <p>
+                                <i class="completed icon icon-approval margin-right-md font-size-16"></i>
+                                <span data-ng-if="feedRules.feedToIndicatorLinking.enabled">
+                                    Enabled the <strong>Feed to Indicator Linking</strong> rule with a confidence
+                                    threshold of
+                                    <strong>{{feedRules.feedToIndicatorLinking.feedConfidenceThreshold}}</strong>.
+                                </span>
+                                <span data-ng-if="!feedRules.feedToIndicatorLinking.enabled">
+                                    Disabled the <strong>Feed to Indicator Linking</strong> rule.
                                 </span>
                             </p>
                             <p><i class="completed icon icon-approval margin-right-md font-size-16"></i><span
-                                    class="bold muted" data-ng-if="feedRules.feedToIndicatorLinking.enabled">Enabled the
-                                    "Feed to
-                                    Indicator Linking" feed rule with a
-                                    confidence threshold of
-                                    {{feedRules.feedToIndicatorLinking.feedConfidenceThreshold}}.</span><span
-                                    class="bold muted" data-ng-if="!feedRules.feedToIndicatorLinking.enabled">Disabled
-                                    the "Feed to
-                                    Indicator Linking" feed rule</span></p>
-                            <p><i class="completed icon icon-approval margin-right-md font-size-16"></i><span
-                                    class="bold muted" data-ng-if="feedRules.highConfidenceThreatFeeds.enabled">Enabled
-                                    the "High
-                                    Confidence Threat Feed Block" feed rule with a
-                                    confidence threshold of
-                                    {{feedRules.highConfidenceThreatFeeds.feedConfidenceThreshold}}.</span><span
-                                    class="bold muted"
-                                    data-ng-if="!feedRules.highConfidenceThreatFeeds.enabled">Disabled the "High
-                                    Confidence Threat Feed Block" feed rule </span></p>
+                                    data-ng-if="feedRules.highConfidenceThreatFeeds.enabled">Enabled
+                                    the <strong>High Confidence Threat Feed Block</strong> rule with a
+                                    confidence threshold of <strong>
+                                        {{feedRules.highConfidenceThreatFeeds.feedConfidenceThreshold}}</strong>.</span><span
+                                    data-ng-if="!feedRules.highConfidenceThreatFeeds.enabled">Disabled the <strong>High
+                                        Confidence Threat Feed Block</strong> rule.</span></p>
                             <p><i class="completed icon icon-approval margin-right-md font-size-16"
                                     data-ng-if="feedRules.unstructuredFeedsSupport.enabled && feedRules.unstructuredFeedsSupport.ingestFeedsFromFile"></i>
-                                <span class="bold muted"
+                                <span
                                     data-ng-if="feedRules.unstructuredFeedsSupport.enabled && feedRules.unstructuredFeedsSupport.ingestFeedsFromFile">Enabled
-                                    the "Unstructured Feeds Support" feed rule
-                                    with "Ingest Unstructured Feeds from Files"<br /><br /></span>
+                                    the <strong>Unstructured Feeds Support</strong> rule for <strong>Ingest Unstructured
+                                        Feeds from Files</strong>.<br /></span>
                                 <i class="completed icon icon-approval margin-right-md font-size-16"
                                     data-ng-if="feedRules.unstructuredFeedsSupport.enabled && !feedRules.unstructuredFeedsSupport.ingestFeedsFromFile"></i>
-                                <span class="bold muted"
+                                <span
                                     data-ng-if="feedRules.unstructuredFeedsSupport.enabled && !feedRules.unstructuredFeedsSupport.ingestFeedsFromFile">Disabled
-                                    the "Unstructured Feeds Support" feed rule
-                                    without "Ingest Unstructured Feeds from Files"<br /><br /></span>
-                                <i class="completed icon icon-approval margin-right-md font-size-16"
+                                    the <strong>Unstructured Feeds Support</strong> rule for <strong>Ingest Unstructured
+                                        Feeds from Files</strong>.<br /></span>
+                            </p>
+                            <p><i class="completed icon icon-approval margin-right-md font-size-16"
                                     data-ng-if="feedRules.unstructuredFeedsSupport.enabled && feedRules.unstructuredFeedsSupport.ingestFeedsFromEmail"></i>
-                                <span class="bold muted"
+                                <span
                                     data-ng-if="feedRules.unstructuredFeedsSupport.enabled && feedRules.unstructuredFeedsSupport.ingestFeedsFromEmail">Enabled
-                                    the "Unstructured Feeds Support" feed rule
-                                    with "Ingest Unstructured Feeds from Email"<br /><br /></span>
+                                    the <strong>Unstructured Feeds Support</strong> rule for <strong>Ingest Unstructured
+                                        Feeds from Email</strong>.<br /></span>
                                 <i class="completed icon icon-approval margin-right-md font-size-16"
                                     data-ng-if="feedRules.unstructuredFeedsSupport.enabled && !feedRules.unstructuredFeedsSupport.ingestFeedsFromEmail"></i>
-                                <span class="bold muted"
+                                <span
                                     data-ng-if="feedRules.unstructuredFeedsSupport.enabled && !feedRules.unstructuredFeedsSupport.ingestFeedsFromEmail">Disabled
-                                    the "Unstructured Feeds Support" feed rule
-                                    without "Ingest Unstructured Feeds from Email"<br /><br /></span>
-                                <i class="completed icon icon-approval margin-right-md font-size-16"
+                                    the <strong>Unstructured Feeds Support</strong> rule for <strong>Ingest Unstructured
+                                        Feeds from Email</strong>.><br /></span>
+                            </p>
+                            <p><i class="completed icon icon-approval margin-right-md font-size-16"
                                     data-ng-if="!feedRules.unstructuredFeedsSupport.enabled"></i> <span
                                     class="bold muted" data-ng-if="!feedRules.unstructuredFeedsSupport.enabled">Disabled
-                                    the "Unstructured Feeds Support" feed rule</span>
-                            </p>
+                                    the <strong>Unstructured Feeds Support</strong> feed rule.</span></p>
                         </div>
                     </div>
                     <div
                         class="solid-border element-secondary-bgcolor padding-20 margin-top-md padding-top-md padding-bottom-md">
-                        <p class="font-size-13 margin-bottom-0 muted">Configurations associated with
-                            prerequisites are now complete.</p>
-                        <p class="font-size-13 margin-bottom-0 muted">Navigate to the <a data-ng-click="close()">Threat
+                        <p class="font-size-13 margin-bottom-0 muted">All prerequisite configurations are complete.</p>
+                        <p class="font-size-13 margin-bottom-0 muted">Navigate to <a data-ng-click="close()">Threat
                                 Intel Management</a> in the navigation menu to
-                            start using this solution.
+                            start using the solution.
                         </p>
                     </div>
                 </div>
