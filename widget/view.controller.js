@@ -168,14 +168,14 @@
         $scope.loadingStates.push(false); // Maintain the length of loadingStates array
         $scope.$apply(); // Apply changes
         loadActiveTab(0);
+        $scope.params = {
+          activeTab: 0
+        };
         const tabHeadings = document.querySelectorAll('.uib-tab-heading');
-        if(tabHeadings.length > 0){
+        if (tabHeadings.length > 0) {
           tabHeadings[0].focus();
         }
       }, 2000);
-      $scope.params = {
-        activeTab: 0
-      };
     };
 
     function installConnector() {
@@ -281,10 +281,10 @@
       }
       else {
         $scope.installedConnectors[connector.tabIndex].health = false;
-          $scope.toggleConnectorConfigSettings = { open: true };
-          $scope.toggleParametersSettings = { open: false };
-          $scope.toggleScheduleConfigSettings = { open: false };
-          $scope.healthyConnectors[connector.tabIndex] = false;
+        $scope.toggleConnectorConfigSettings = { open: true };
+        $scope.toggleParametersSettings = { open: false };
+        $scope.toggleScheduleConfigSettings = { open: false };
+        $scope.healthyConnectors[connector.tabIndex] = false;
       }
     });
 
@@ -394,8 +394,8 @@
               body: 'Data Ingestion successfully configured for the integration ' + healthyConnector.label
             });
             $scope.toggleConnectorConfigSettings = { open: false };
-          $scope.toggleParametersSettings = { open: true };
-          $scope.toggleScheduleConfigSettings = { open: false };
+            $scope.toggleParametersSettings = { open: true };
+            $scope.toggleScheduleConfigSettings = { open: false };
             resolve();
           })
           .catch(function (error) {
@@ -443,7 +443,7 @@
       _checkConnectorHealth();
     }
 
-    
+
     function saveParams(timParamsForm, index) {
       widgetDataIngestionService.saveDataIngestionParams($scope, timParamsForm, index);
       timParamsForm.$setPristine();
@@ -451,11 +451,11 @@
 
 
     function _checkConnectorHealth() {
-      if($scope.installedConnectors.length === 0){
+      if ($scope.installedConnectors.length === 0) {
         toaster.error({
           body: 'At least one integration configuration should be necessary.'
-      });
-      return;
+        });
+        return;
       }
       $scope.areFeedConnectorsConfigured = true;
       const promises = $scope.installedConnectors.reduce((promise, installedConnector, index) => {
