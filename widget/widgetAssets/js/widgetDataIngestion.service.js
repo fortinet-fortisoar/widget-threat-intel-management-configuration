@@ -8,9 +8,9 @@
         .module('cybersponse')
         .factory('widgetDataIngestionService', widgetDataIngestionService);
 
-    widgetDataIngestionService.$inject = [ 'threatIntelManagementConfigurationService', 'connectorService', 'API', '_', '$filter', '$q', 'dataIngestionService', 'PagedCollection', '$resource', 'FIXED_MODULE', 'Entity', 'playbookService', 'translationService', 'toaster'];
+    widgetDataIngestionService.$inject = ['threatIntelManagementConfigurationService', 'connectorService', 'API', '_', '$filter', '$q', 'dataIngestionService', 'PagedCollection', '$resource', 'FIXED_MODULE', 'Entity', 'playbookService', 'translationService', 'toaster'];
 
-    function widgetDataIngestionService( threatIntelManagementConfigurationService, connectorService, API, _, $filter, $q, dataIngestionService, PagedCollection, $resource, FIXED_MODULE, Entity, playbookService, translationService, toaster) {
+    function widgetDataIngestionService(threatIntelManagementConfigurationService, connectorService, API, _, $filter, $q, dataIngestionService, PagedCollection, $resource, FIXED_MODULE, Entity, playbookService, translationService, toaster) {
 
         var service = {
             cloneIngestionPlaybookCollection: cloneIngestionPlaybookCollection,
@@ -75,7 +75,7 @@
                 .catch(error => {
                     console.error('Error in cloneIngestionPlaybookCollection:', error);
                     return Promise.reject(error); // Handle errors
-                });   
+                });
         }
 
         //Retrieve the sample configuration parameters from the fetch playbook.
@@ -134,7 +134,7 @@
                         return Promise.reject(error); // Handle errors
                     });
             }
-            else{
+            else {
                 return new Promise((resolve, reject) => {
                     resolve();
                 });
@@ -200,6 +200,9 @@
                 scope.dataIngestionParamsUpdating = false;
                 timParamsForm.$dirty = false;
                 scope.connectorParamsStatus[index] = true;
+                scope.toggleConnectorConfigSettings = { open: false };
+                scope.toggleParametersSettings = { open: false };
+                scope.toggleScheduleConfigSettings = { open: true };
             }).catch(error => {
                 // Handle any errors if needed
                 console.error('Error in _updateConfigPrams:', error);
@@ -208,56 +211,56 @@
         }
 
         async function _updateConfigPrams(scope, healthyConnectorsParam) {
-                // Step 1: Get filtered modules
-                scope.filteredModules = _getIngestionModules(scope.modules, healthyConnectorsParam);
-                let moduleList = scope.filteredModules.length > 0 ? scope.filteredModules : [];
-                scope.moduleType = scope.filteredModules.length > 0 ? scope.filteredModules[0].type : moduleList[0].type;
-                // Step 2: Validate existing playbook
-                healthyConnectorsParam.processing = false;
-                let selectedPlaybook = healthyConnectorsParam.ingestionPlaybook.fetchPlaybook;
-                healthyConnectorsParam.ingestionPlaybook.fetchConfigurationCopy = angular.copy(healthyConnectorsParam.ingestionPlaybook.fetchConfiguration);
-                if (playbookService.isTagAvailable(selectedPlaybook, 'fetch', threatIntelManagementConfigurationService.ingestionRecordTags)) {
-                    healthyConnectorsParam.processing = true;
-                    // Step 3: Set fields asynchronously
-                    try {
-                        await _setFields(scope, moduleList);
-                        // Step 4: Validate existing playbook after fields are set
-                        if (_validateExistingPlaybook(healthyConnectorsParam)) {
-                            let playbookId = $filter('getEndPathName')(selectedPlaybook['@id']);
-                            let fetchModified = false;
-                            let configModified = false;
-                            scope.fieldsObj = scope.fieldsObj || {};
-                            let playbookEntity = scope.samplePlaybookEntity[healthyConnectorsParam.ingestionPlaybook.ingestionConnector.name];
-                            let fetchIndex = _.isEmpty(scope.connectorFetchIndex) ? -1 : scope.connectorFetchIndex[healthyConnectorsParam.ingestionPlaybook.ingestionConnector.name].fetchIndex;
-                            let configIndex = _.isEmpty(scope.connectorConfigIndex) ? -1 : scope.connectorConfigIndex[healthyConnectorsParam.ingestionPlaybook.ingestionConnector.name].configIndex;
-                            // Step 5: Modify sample playbook data if needed
-                            if (playbookEntity) {
-                                var samplePlaybookData = playbookEntity.getData();
-                                samplePlaybookData['@id'] = playbookEntity.originalData['@id'];
-                                if (fetchIndex > -1 && (!angular.equals(samplePlaybookData.steps[fetchIndex].arguments.params, healthyConnectorsParam.ingestionPlaybook.fetchConfiguration))) {
-                                    fetchModified = true;
-                                    samplePlaybookData.steps[fetchIndex].arguments.params = angular.extend(samplePlaybookData.steps[fetchIndex].arguments.params, healthyConnectorsParam.ingestionPlaybook.fetchConfiguration);
-                                } else if (configIndex > -1 && (!angular.equals(selectedPlaybook.steps[configIndex].arguments, healthyConnectorsParam.ingestionPlaybook.fetchConfiguration))) {
-                                    configModified = true;
-                                    selectedPlaybook.steps[configIndex].arguments = angular.extend(selectedPlaybook.steps[configIndex].arguments, healthyConnectorsParam.ingestionPlaybook.fetchConfiguration);
-                                    samplePlaybookData.steps[configIndex].arguments = angular.copy(selectedPlaybook.steps[configIndex].arguments);
-                                }
-                                // Step 6: Save sample playbook entity if modified
-                                if (fetchModified || configModified) {
-                                    let samplePlaybook = playbookService.preparePlaybookForSave(samplePlaybookData);
-                                    await playbookEntity.save(samplePlaybook, { $relationships: true });
-                                }
+            // Step 1: Get filtered modules
+            scope.filteredModules = _getIngestionModules(scope.modules, healthyConnectorsParam);
+            let moduleList = scope.filteredModules.length > 0 ? scope.filteredModules : [];
+            scope.moduleType = scope.filteredModules.length > 0 ? scope.filteredModules[0].type : moduleList[0].type;
+            // Step 2: Validate existing playbook
+            healthyConnectorsParam.processing = false;
+            let selectedPlaybook = healthyConnectorsParam.ingestionPlaybook.fetchPlaybook;
+            healthyConnectorsParam.ingestionPlaybook.fetchConfigurationCopy = angular.copy(healthyConnectorsParam.ingestionPlaybook.fetchConfiguration);
+            if (playbookService.isTagAvailable(selectedPlaybook, 'fetch', threatIntelManagementConfigurationService.ingestionRecordTags)) {
+                healthyConnectorsParam.processing = true;
+                // Step 3: Set fields asynchronously
+                try {
+                    await _setFields(scope, moduleList);
+                    // Step 4: Validate existing playbook after fields are set
+                    if (_validateExistingPlaybook(healthyConnectorsParam)) {
+                        let playbookId = $filter('getEndPathName')(selectedPlaybook['@id']);
+                        let fetchModified = false;
+                        let configModified = false;
+                        scope.fieldsObj = scope.fieldsObj || {};
+                        let playbookEntity = scope.samplePlaybookEntity[healthyConnectorsParam.ingestionPlaybook.ingestionConnector.name];
+                        let fetchIndex = _.isEmpty(scope.connectorFetchIndex) ? -1 : scope.connectorFetchIndex[healthyConnectorsParam.ingestionPlaybook.ingestionConnector.name].fetchIndex;
+                        let configIndex = _.isEmpty(scope.connectorConfigIndex) ? -1 : scope.connectorConfigIndex[healthyConnectorsParam.ingestionPlaybook.ingestionConnector.name].configIndex;
+                        // Step 5: Modify sample playbook data if needed
+                        if (playbookEntity) {
+                            var samplePlaybookData = playbookEntity.getData();
+                            samplePlaybookData['@id'] = playbookEntity.originalData['@id'];
+                            if (fetchIndex > -1 && (!angular.equals(samplePlaybookData.steps[fetchIndex].arguments.params, healthyConnectorsParam.ingestionPlaybook.fetchConfiguration))) {
+                                fetchModified = true;
+                                samplePlaybookData.steps[fetchIndex].arguments.params = angular.extend(samplePlaybookData.steps[fetchIndex].arguments.params, healthyConnectorsParam.ingestionPlaybook.fetchConfiguration);
+                            } else if (configIndex > -1 && (!angular.equals(selectedPlaybook.steps[configIndex].arguments, healthyConnectorsParam.ingestionPlaybook.fetchConfiguration))) {
+                                configModified = true;
+                                selectedPlaybook.steps[configIndex].arguments = angular.extend(selectedPlaybook.steps[configIndex].arguments, healthyConnectorsParam.ingestionPlaybook.fetchConfiguration);
+                                samplePlaybookData.steps[configIndex].arguments = angular.copy(selectedPlaybook.steps[configIndex].arguments);
                             }
-                            // Step 7: Get data after modifying or if not modified
-                            _getData(scope, playbookId, selectedPlaybook, healthyConnectorsParam);
+                            // Step 6: Save sample playbook entity if modified
+                            if (fetchModified || configModified) {
+                                let samplePlaybook = playbookService.preparePlaybookForSave(samplePlaybookData);
+                                await playbookEntity.save(samplePlaybook, { $relationships: true });
+                            }
                         }
-                    } catch (error) {
-                        console.error('Error processing:', error);
-                        healthyConnectorsParam.processing = false;
+                        // Step 7: Get data after modifying or if not modified
+                        _getData(scope, playbookId, selectedPlaybook, healthyConnectorsParam);
                     }
-                } else {
+                } catch (error) {
+                    console.error('Error processing:', error);
                     healthyConnectorsParam.processing = false;
                 }
+            } else {
+                healthyConnectorsParam.processing = false;
+            }
         }
 
         function _getIngestionModules(modules, healthyConnectorsParam) {
