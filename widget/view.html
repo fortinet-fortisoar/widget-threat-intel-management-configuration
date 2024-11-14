@@ -190,7 +190,7 @@
                     <p class="font-Size-13 muted"><span>This page shows the installation status of the feed integrations
                             you selected on the previous page.</span></p>
                     <p class="font-Size-13 muted">
-                        <span>Total Connectors {{getSelectedConnectorsCount}}</span>
+                        <span>Total Connectors: {{getSelectedConnectorsCount}}</span>
                     </p>
                     <div ng-if="connector.selectConnector" ng-repeat="connector in feedConnectors"
                         class="padding-5 display-flex-space-between"
@@ -239,12 +239,14 @@
                             <uib-tabset active="params.activeTab" class="margin-top-11 width-100pt">
                                 <uib-tab data-ng-repeat="timTool in installedConnectors track by $index" index="$index"
                                     data-ng-click="loadActiveTab($index)">
-                                    <uib-tab-heading>
-                                        <span class="tab-label padding-left-sm">{{ timTool.label }}</span>
-                                        <button type="button" class="close-icon font-9px font-color-danger"
-                                            ng-click="removeTab($index); $event.stopPropagation(); $event.preventDefault();">
-                                            <i class="icon icon-close"></i>
-                                        </button>
+                                    <uib-tab-heading tabindex="0">
+                                        <span class="tab-label padding-left-sm" aria-label="Close">{{ timTool.label }}
+                                            <span
+                                                data-ng-click="removeTab($index); $event.stopPropagation(); $event.preventDefault();"
+                                                class="close-tab-button" role="button" tabindex="$index">
+                                                <i class="fa margin-left-sm"
+                                                    data-ng-class="loadingStates[$index] ? 'fa-spin fa-spinner' : 'icon icon-close'"></i>
+                                            </span></span>
                                     </uib-tab-heading>
                                     <div class="col-md-5 display-flex align-items-center">
                                         <div class="full-width info-graphic-margin">
@@ -252,7 +254,7 @@
                                         </div>
                                     </div>
                                     <div class="col-md-7 padding-left-0 prerequisites-section">
-                                        <form name="params.timConfigForm">
+                                        <form name="timConfigForm" data-ng-if="timTool.label === selectedFeedConnectorName">
                                             <div
                                                 class="font-size-25 line-height-1 margin-bottom-lg margin-top-18 muted-80">
                                                 Configure {{ timTool.label }}</div>
@@ -287,8 +289,8 @@
                                                                         content-detail="timTool"
                                                                         configured-agents="connectorInstalledOnAgents[$index]"
                                                                         close-panel="handleClose()" owners="owners"
-                                                                        tab-index="$index"
-                                                                        ng-if="params.activeTab === $index"></widget-connector-configuration-component>
+                                                                        tab-index="$index">
+                                                                    </widget-connector-configuration-component>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -322,38 +324,41 @@
                                                                     Configuration Name:
                                                                     {{healthyConnectorsParams[$index].ingestionPlaybook.ingestionConnector.configuration.name}}
                                                                 </h6>
-                                                                <div ng-form="params.timConfigForm[healthyConnectorsParams[$index].ingestionPlaybook.ingestionConnector.name]"
-                                                                    name="params.timConfigForm[healthyConnectorsParams[$index].ingestionPlaybook.ingestionConnector.name]"
+                                                                <div
                                                                     data-ng-if="healthyConnectorsParams[$index].ingestionPlaybook.fetchOperation">
-                                                                    <cs-connector-field-renderer
-                                                                        data-cs-form="params.timConfigForm[healthyConnectorsParams[$index].ingestionPlaybook.ingestionConnector.name]"
-                                                                        data-enable-jinja="false"
-                                                                        data-json-fields="healthyConnectorsParams[$index].ingestionPlaybook.fetchOperation"
-                                                                        data-params="healthyConnectorsParams[$index].ingestionPlaybook.fetchConfiguration"
-                                                                        data-connector-data="{'connector':healthyConnectorsParams[$index].ingestionPlaybook.ingestionConnector,'version':ingestionDetails.ingestionPlaybook.ingestionConnector.version, 'configuration':ingestionDetails.ingestionPlaybook.ingestionConnector.configuration}"
-                                                                        data-on-field-change="configFieldChanged"
-                                                                        data-show-subtitle="true">
-                                                                    </cs-connector-field-renderer>
+                                                                    <div>
+                                                                        <cs-connector-field-renderer
+                                                                            data-cs-form="timConfigForm"
+                                                                            data-enable-jinja="false"
+                                                                            data-json-fields="healthyConnectorsParams[$index].ingestionPlaybook.fetchOperation"
+                                                                            data-params="healthyConnectorsParams[$index].ingestionPlaybook.fetchConfiguration"
+                                                                            data-connector-data="{'connector':healthyConnectorsParams[$index].ingestionPlaybook.ingestionConnector,'version':ingestionDetails.ingestionPlaybook.ingestionConnector.version, 'configuration':ingestionDetails.ingestionPlaybook.ingestionConnector.configuration}"
+                                                                            data-on-field-change="configFieldChanged"
+                                                                            data-show-subtitle="true">
+                                                                        </cs-connector-field-renderer>
+                                                                        <button
+                                                                            id="params-edit-save-{{healthyConnectorsParams[$index].ingestionPlaybook.ingestionConnector.name}}"
+                                                                            type="button"
+                                                                            data-ng-if="dataIngestionParamsUpdating === false && allowPlaybookEdit"
+                                                                            class="margin-15 btn btn-sm btn-primary"
+                                                                            data-ng-disabled="!timConfigForm.$dirty"
+                                                                            data-ng-click="saveParams(timConfigForm, $index)">
+                                                                            <i
+                                                                                class="icon icon-check margin-right-sm"></i>Save
+                                                                        </button>
+                                                                        <button
+                                                                            data-ng-if="dataIngestionParamsUpdating === true"
+                                                                            type="button"
+                                                                            class="margin-15 btn btn-sm btn-primary"
+                                                                            data-ng-disabled="dataIngestionParamsUpdating === true"
+                                                                            id="saving-edit-params-{{healthyConnectorsParams[$index].ingestionPlaybook.ingestionConnector.name}}">
+                                                                            <cs-spinner
+                                                                                class="pull-left margin-top-xsm state-wait button-spinner margin-right-sm"
+                                                                                data-show-background="true"
+                                                                                data-no-margin="margin-0"></cs-spinner>Saving
+                                                                        </button>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                            <div class="margin-15">
-                                                                <button id="params-edit-save" type="button"
-                                                                    data-ng-if="dataIngestionParamsUpdating === false && allowPlaybookEdit"
-                                                                    class="btn btn-sm btn-primary"
-                                                                    data-ng-disabled="!params.timConfigForm[healthyConnectorsParams[$index].ingestionPlaybook.ingestionConnector.name].$dirty"
-                                                                    data-ng-click="saveParams(params.timConfigForm[healthyConnectorsParams[$index].ingestionPlaybook.ingestionConnector.name], $index)">
-                                                                    <i class="icon icon-check margin-right-sm"></i>Save
-                                                                </button>
-                                                                <button
-                                                                    data-ng-if="dataIngestionParamsUpdating === true"
-                                                                    type="button" class="btn btn-sm btn-primary"
-                                                                    data-ng-disabled="dataIngestionParamsUpdating === true"
-                                                                    id="saving-edit-params">
-                                                                    <cs-spinner
-                                                                        class="pull-left margin-top-xsm state-wait button-spinner margin-right-sm"
-                                                                        data-show-background="true"
-                                                                        data-no-margin="margin-0"></cs-spinner>Saving
-                                                                </button>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -382,13 +387,11 @@
                                                         <div class="padding-left-lg margin-top-negative-20">
                                                             <div
                                                                 class="padding-left-lg padding-right-lg overflow-auto query-section">
-                                                                <div
-                                                                    data-ng-if="scheduleJsonData.ingestionPlaybook.ingestPlaybook">
+                                                                <div data-ng-if="scheduleJsonData.ingestionPlaybook.ingestPlaybook">
                                                                     <div class="margin-left-md"
                                                                         data-tim-schedule-playbook
                                                                         view-widget-vars="viewWidgetVars"
-                                                                        json-data="scheduleJsonData"
-                                                                        ng-if="params.activeTab === $index">
+                                                                        json-data="scheduleJsonData">
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -445,7 +448,7 @@
                                         <div class="queue-card-header-text margin-right-3">Feed To
                                             Indicator Linking</div>
                                         <div class="margin-right-md">
-                                            <label class="margin-0 switch switch-pill switch-label switch-success">
+                                            <label class="margin-0 switch switch-pill switch-label switch-success" data-ng-click="$event.stopPropagation();">
                                                 <input type="checkbox" class="switch-input"
                                                     id="feed-to-indicator-linking-switch-slider"
                                                     name="feed-to-indicator-linking-switch-slider"
@@ -495,7 +498,7 @@
                                         <div class="queue-card-header-text margin-right-3">High Confidence
                                             Threat Feed Block</div>
                                         <div class="margin-right-md">
-                                            <label class="margin-0 switch switch-pill switch-label switch-success">
+                                            <label class="margin-0 switch switch-pill switch-label switch-success" data-ng-click="$event.stopPropagation();">
                                                 <input type="checkbox" class="switch-input"
                                                     id="high-confidence-threat-feeds-switch-slider"
                                                     name="high-confidence-threat-feeds-switch-slider"
@@ -565,7 +568,7 @@
                                         <div class="queue-card-header-text margin-right-3">
                                             Unstructured Feeds Support</div>
                                         <div class="margin-right-md">
-                                            <label class="margin-0 switch switch-pill switch-label switch-success">
+                                            <label class="margin-0 switch switch-pill switch-label switch-success" data-ng-click="$event.stopPropagation();">
                                                 <input type="checkbox" class="switch-input"
                                                     id="high-confidence-threat-feeds-switch-slider"
                                                     name="high-confidence-threat-feeds-switch-slider"

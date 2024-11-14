@@ -102,3 +102,10 @@
 .selectedInstallConnector:checked:before {
 	background-color: #22a6af;
 }
+
+.close-tab-button {
+	cursor: pointer;
+	&:hover {
+		color: #22a6af;
+	}
+}

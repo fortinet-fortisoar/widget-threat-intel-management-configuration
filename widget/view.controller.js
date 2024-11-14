@@ -142,18 +142,40 @@
     }
 
     $scope.removeTab = function (index) {
-      $scope.installedConnectors.splice(index, 1);
-      $scope.connectorInstalledOnAgents.splice(index, 1);
-      $scope.dataIngestCollectionUUIDs.splice(index, 1);
-      $scope.saveSchedules.splice(index, 1);
-      if ($scope.params.activeTab === index) {
-        // Set active tab to the previous tab if available
-        $scope.params.activeTab = Math.max(0, index - 1);
-      } else if ($scope.params.activeTab > index) {
-        // If the active tab was after the removed tab, decrement the active tab index
-        $scope.params.activeTab--;
-      }
-      loadActiveTab(0);
+      $scope.loadingStates[index] = true;
+      $timeout(function () {
+        // Logic to remove the tab
+        $scope.installedConnectors.splice(index, 1);
+        $scope.connectorInstalledOnAgents.splice(index, 1);
+        $scope.dataIngestCollectionUUIDs.splice(index, 1);
+        $scope.healthyConnectors.splice(index, 1);
+        $scope.saveSchedules.splice(index, 1);
+        if ($scope.params.activeTab === index) {
+          $scope.params.activeTab = 0;
+        } else if ($scope.params.activeTab > index) {
+          // If the active tab was after the removed tab, decrement the active tab index
+          $scope.params.activeTab--;
+        }
+        // Remove loading state for the specific tab
+        $scope.loadingStates.splice(index, 1);
+
+        // Adjust the active tab index accordingly
+        for (let i = 0; i < $scope.loadingStates.length; i++) {
+          if (i >= index) {
+            $scope.loadingStates[i] = $scope.loadingStates[i + 1]; // Shift the loading states
+          }
+        }
+        $scope.loadingStates.push(false); // Maintain the length of loadingStates array
+        $scope.$apply(); // Apply changes
+        loadActiveTab(0);
+        $scope.params = {
+          activeTab: 0
+        };
+        const tabHeadings = document.querySelectorAll('.uib-tab-heading');
+        if (tabHeadings.length > 0) {
+          tabHeadings[0].focus();
+        }
+      }, 2000);
     };
 
     function installConnector() {
@@ -197,14 +219,16 @@
         if (CommonUtils.isUndefined($scope.params.activeTab)) {
           $scope.params = {
             activeTab: 0
-          }
+          };
         }
+        // $scope.selectedFeedConnectorName = $scope.installedConnectors[0].label;
         _loadConnectorDetails(0, $scope.installedConnectors[0]);
       }
       else {
         $scope.params = {
           activeTab: tabIndex
-        }
+        };
+        $scope.selectedFeedConnectorName = $scope.installedConnectors[tabIndex].label;
         _loadConnectorDetails(tabIndex, $scope.installedConnectors[tabIndex]);
       }
     }
@@ -235,11 +259,19 @@
       $scope.healthyConnectors[data.tabIndex] = false;
     });
 
+    $scope.$on('toggleAgentMode', function (event, data) {
+      $scope.healthyConnectors[data.tabIndex] = false;
+    });
+
     $scope.$on('healthCheckDetails', function (event, connectorDetails) {
       var connector = angular.copy(connectorDetails);
       const connectorConfig = _.find(connector.connectorInfo.configuration, { config_id: connector.config_id });
-      if (connectorConfig.status === "Available") {
-        if (!$scope.healthyConnectors[connector.tabIndex]) {
+      $scope.toggleConnectorConfigSettings = { open: true };
+      $scope.toggleParametersSettings = { open: false };
+      $scope.toggleScheduleConfigSettings = { open: false };
+      $scope.scheduleJsonData = undefined;
+      if (!CommonUtils.isUndefined(connectorConfig) && connectorConfig.status === "Available") {
+        if (!$scope.healthyConnectors[connector.tabIndex] || !_.isEmpty(connectorConfig.remote_status)) {
           $scope.installedConnectors[connector.tabIndex].health = true;
           _.assign(connector.connectorInfo, { "configuration": connectorConfig });
           _.assign(connector.connectorInfo, { "playbook_collections": connector.connectorInfo.playbook_collections[0] });
@@ -343,22 +375,33 @@
     }
 
     function _processDataIngestion(tabIndex, healthyConnector) {
-      // Return a promise to initiate the chain
       return new Promise((resolve, reject) => {
-        widgetDataIngestionService.cloneIngestionPlaybookCollection($scope, healthyConnector).then(function () {
-          widgetDataIngestionService.prepareFetchSampleConfig($scope, tabIndex, healthyConnector).then(function () {
-            $scope.dataIngestCollectionUUIDs[tabIndex] = $scope.ingestCollectionUUID
-            _createDefaultSchedule(tabIndex, $scope.healthyConnectorsParams[tabIndex]);
+        widgetDataIngestionService.cloneIngestionPlaybookCollection($scope, healthyConnector)
+          .then(function () {
+            return widgetDataIngestionService.prepareFetchSampleConfig($scope, tabIndex, healthyConnector);
+          })
+          .then(function () {
+            // Wrapping _createDefaultSchedule in a promise to ensure it completes before moving on
+            return new Promise((resolve) => {
+              _createDefaultSchedule(tabIndex, $scope.healthyConnectorsParams[tabIndex]);
+              resolve(); // Resolving after _createDefaultSchedule finishes
+            });
+          })
+          .then(function () {
+            $scope.dataIngestCollectionUUIDs[tabIndex] = $scope.ingestCollectionUUID;
             $scope.healthyConnectors[tabIndex] = true;
             toaster.success({
               body: 'Data Ingestion successfully configured for the integration ' + healthyConnector.label
             });
+            $scope.toggleConnectorConfigSettings = { open: false };
+            $scope.toggleParametersSettings = { open: true };
+            $scope.toggleScheduleConfigSettings = { open: false };
             resolve();
+          })
+          .catch(function (error) {
+            console.error('Error processing healthyConnectors:', error);
+            reject(error);
           });
-        }).catch(error => {
-          console.error('Error processing healthyConnectors:', error);
-          reject(error); // Reject if there's an error
-        });
       });
     }
 
@@ -386,13 +429,13 @@
         if (response['hydra:member'].length === 0) {
           $resource(API.WORKFLOW + 'api/scheduled/?format').save(queryBody).$promise.then(function (postResponse) {
             $scope.saveSchedules[tabIndex] = postResponse;
+            $scope.scheduleJsonData = angular.copy(ingestionConnectorDetails);
           });
         }
         else {
           $scope.saveSchedules[tabIndex] = response['hydra:member'][0];
-          console.log(response);
+          $scope.scheduleJsonData = angular.copy(ingestionConnectorDetails);
         }
-        $scope.scheduleJsonData = angular.copy(ingestionConnectorDetails);
       });
     }
 
@@ -400,12 +443,20 @@
       _checkConnectorHealth();
     }
 
+
     function saveParams(timParamsForm, index) {
-      widgetDataIngestionService.saveDataIngestionParams($scope, timParamsForm, index)
+      widgetDataIngestionService.saveDataIngestionParams($scope, timParamsForm, index);
+      timParamsForm.$setPristine();
     }
 
 
     function _checkConnectorHealth() {
+      if ($scope.installedConnectors.length === 0) {
+        toaster.error({
+          body: 'At least one integration configuration should be necessary.'
+        });
+        return;
+      }
       $scope.areFeedConnectorsConfigured = true;
       const promises = $scope.installedConnectors.reduce((promise, installedConnector, index) => {
         return promise.then(() => {
@@ -437,7 +488,7 @@
               const metaData = {
                 "name": $scope.saveSchedules[index].name,
                 "description": "Metadata for " + $scope.saveSchedules[index].description,
-                "modified_by": "3451141c-bac6-467c-8d72-85e0fab569ce",
+                "modified_by": "3451141c-bac6-467c-8d72-85e0fab569ce", //CSAdmin user uuid
                 "owners": [],
                 "connector": {
                   "name": configConnector.name,
@@ -573,17 +624,20 @@
     }
 
     function moveToConfigureConnector() {
+      $scope.selectedFeedConnectorName = fortiGuardConnectorName;
       $scope.fetchingAvailableConnectors = false;
       $scope.installedConnectors = $scope.feedConnectors.filter(connector => connector.installed === true && connector.selectConnector === true);
       const fortiGuardConnector = _.find($scope.installedConnectors, { label: fortiGuardConnectorName });
       const filteredConnectors = _.filter($scope.installedConnectors, connector => connector.label !== fortiGuardConnectorName);
       const sortedConnectors = _.sortBy(filteredConnectors, 'label');
       $scope.installedConnectors = [fortiGuardConnector].concat(sortedConnectors);
+      $scope.loadingStates = [];
       $scope.healthyConnectors = [];
       $scope.connectorHealthStatus = [];
       $scope.connectorParamsStatus = [];
       $scope.installedConnectors.reduce((promise, installedConnector, index) => {
         return promise.then(() => {
+          $scope.loadingStates[index] = false;
           installedConnector.health = false;
           $scope.healthyConnectors[index] = false;
           $scope.connectorHealthStatus[index] = false;
@@ -597,7 +651,7 @@
         .catch(error => {
           console.error('Error processing connectors:', error);
         });
-      loadActiveTab($state.params.tabIndex, $state.params.tab);
+      loadActiveTab($scope.params.activeTab);
       WizardHandler.wizard('timSolutionpackConfigWizard').next();
     }
 

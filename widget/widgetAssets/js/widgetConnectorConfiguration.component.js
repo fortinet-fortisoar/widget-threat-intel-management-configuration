@@ -511,6 +511,7 @@
     }
 
     toggleAgentMode(agentMode) {
+      self.$rootScope.$broadcast('toggleAgentMode', { 'tabIndex': self.tabIndex, 'agentMode': agentMode });
       self.formHolder.connectorForm[self.tabIndex].$setPristine();
       self.agentMode = agentMode;
       if (agentMode) {
