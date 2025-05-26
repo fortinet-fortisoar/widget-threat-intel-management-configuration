@@ -1,18 +1,17 @@
-# Release Information
+**Version**: 1.0.0
 
-- **Version**: 1.0.0
+**Certified**: Yes
 
-- **Certified**: Yes
+**Publisher**: Fortinet
 
-- **Publisher**: Fortinet  
+**Compatibility**: 7.6.1 and later
 
-- **Compatibility**: 7.6.1 and later
+**Applicable**: Threat Intel Management solution pack
 
-- **Applicable**: Threat Intel Management Solution Pack
+## Overview
 
-# Overview
+The Threat Intel Management Configuration Wizard serves as a critical interface for SOC analysts and administrators setting up Threat Intel Management for use. Exclusive to the **Threat Intel Management** solution pack, this widget streamlines configuration settings.
 
-The *Threat Intel Management* solution pack uses the **Threat Intel Management Configuration** wizard to set up Threat Intel Management within your environment. During the configuration process you select, install, and configure feed integrations and adjust threat feed rules to enhance your threat intelligence capabilities.
 
 > [!NOTE]
 > For more information refer to [Threat Intel Management](https://github.com/fortinet-fortisoar/solution-pack-threat-intel-management/blob/develop/README.md) solution pack documentation.
