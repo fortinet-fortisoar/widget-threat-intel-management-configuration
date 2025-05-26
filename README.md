@@ -1,12 +1,14 @@
-**Version**: 1.0.0
+- **Version**: 1.1.0
 
-**Certified**: Yes
+- **Certified**: Yes
 
-**Publisher**: Fortinet
+- **Publisher**: Fortinet
 
-**Compatibility**: 7.6.1 and later
+- **Compatibility**: 7.6.1 and later
 
-**Applicable**: Threat Intel Management solution pack
+- **Applicable**: Threat Intel Management solution pack
+
+- [Release Notes](./release_notes.md)
 
 ## Overview
 
